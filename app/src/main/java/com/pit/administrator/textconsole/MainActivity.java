@@ -11,19 +11,24 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import noweb.WebForthVM;
+import noweb.*;
 
 import static com.pit.administrator.textconsole.R.id.scrollView;
 import static com.pit.administrator.textconsole.R.id.textView;
 
-public class MainActivity extends AppCompatActivity implements noweb.App
+public class MainActivity extends AppCompatActivity implements App, StringSink
 {
     private StringBuffer theText = new StringBuffer();
     private TextView myTextView;
     private ScrollView scroll;
     private Handler _hand;
+    private WebForthVM webForthVM;
 
-    public void post (final String txt)
+    public enum MODE {EDIT, DIRECT}
+    public MODE mode = MODE.DIRECT;
+    private LineEdit _editor;
+
+    public void post (final CharSequence txt)
     {
         _hand.post(() ->
         {
@@ -44,34 +49,52 @@ public class MainActivity extends AppCompatActivity implements noweb.App
         myTextView = findViewById(textView);
         scroll = findViewById(scrollView);
         _hand = new Handler();
+        _editor = new LineEdit(new StringStream(this).getPrintStream());
 
-        WebForthVM wf = new WebForthVM(this);
-        wf.prepare();
-        wf.start();
+        webForthVM = new WebForthVM(this);
+        webForthVM.prepare();
+        webForthVM.start();
 
         final EditText edittext =  findViewById(R.id.edittext);
-        edittext.setOnKeyListener(new View.OnKeyListener()
+        edittext.setOnKeyListener((v, keyCode, event) ->
         {
-            public boolean onKey(View v, int keyCode, KeyEvent event)
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                    (keyCode == KeyEvent.KEYCODE_ENTER))
             {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER))
-                {
-                    String s = edittext.getText().toString();
-                    for (int l=0; l<s.length(); l++)
-                    {
-                        wf.enqueueKey(s.charAt(l));
-                    }
-                    wf.enqueueKey('\n');
-
-                    //textOut(edittext.getText().toString());
-                    edittext.getText().clear();
-                    return true;
-                }
-                return false;
+                handleInputLine (edittext.getText().toString());
+                edittext.getText().clear();
+                return true;
             }
+            return false;
         });
+    }
 
+    private void handleInputLine (String s)
+    {
+        if (mode == MODE.DIRECT)
+        {
+            if (s.equals ("editor"))
+            {
+                mode = MODE.EDIT;
+                //post ("Type #h for help ...");
+                _editor.handleLine("#h");
+            }
+            else
+            {
+                for (int l = 0; l < s.length(); l++)
+                {
+                    webForthVM.enqueueKey(s.charAt(l));
+                }
+                webForthVM.enqueueKey('\n');
+            }
+        }
+        else // mode == EDIT
+        {
+            if (!_editor.handleLine(s))
+            {
+                mode = MODE.DIRECT;
+            }
+        }
     }
 
     @Override
