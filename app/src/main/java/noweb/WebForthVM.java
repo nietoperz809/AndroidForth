@@ -2,7 +2,6 @@ package noweb;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Hashtable;
 
 /**
@@ -10,9 +9,17 @@ import java.util.Hashtable;
  */
 public class WebForthVM extends Thread
 {   // Version VER.EXT
+//    public static final int MAX_CHAR = 511; //5 CMJ
+//    static final int CRR = 13;   // carriage return
+//    static final int TIC = 39;   // tick: '
+//    static final int BASEE = 10;
+//    static final int VOCS = 8;
+//    // //4 PSHP-2    static final int TOOLONG = 129;    // one more than max line length in source file //4 PSHP
+////    static final int FIBLENGTH = 129;  // one more than max line length in source file //4 PSHP-2
+//    static final int TOOLONG = 256;    // one more than max line length in source file //6 CJ
+//    static final int FIND = 38; // FIND
     // Keyboard Event buffer
     private static final int KEYBUFLEN = 256;
-    public static final int MAX_CHAR = 511; //5 CMJ
     // Output character buffer
     private static final int OUTBUFLEN = 256;
     // Block I/O data
@@ -28,16 +35,12 @@ public class WebForthVM extends Thread
     private static final int FALSE = 0;
     private static final int BKSPP = 8;    // backspace
     private static final int LF = 10;   // line feed
-    static final int CRR = 13;   // carriage return
     private static final int ERR = 27;   // Escape character
-    static final int TIC = 39;   // tick: '
     // In this implementation, the address units is a 32-bit
     // DWORD, and the cell is also a 32-bit DWORD, so the
     // "size" of a cell is 1 unit.
     // (This implementation doesn't "know" about bytes.)
     private static final int CELLL = 1;
-    static final int BASEE = 10;
-    static final int VOCS = 8;
     private static final int EM = 0x0000FF00;// top of memory
     private static final int BUFFER0 = 0x00010000;// I/O buffer addr
     private static final int COLDD = 0x0100;       // cold start vector
@@ -57,9 +60,6 @@ public class WebForthVM extends Thread
     private static final int NOTRACE = 0;
     private static final int STEPPING = 2;
     private static final int SHOWING = 4;
-    // //4 PSHP-2    static final int TOOLONG = 129;    // one more than max line length in source file //4 PSHP
-//    static final int FIBLENGTH = 129;  // one more than max line length in source file //4 PSHP-2
-    static final int TOOLONG = 256;    // one more than max line length in source file //6 CJ
     private static final int FIBLENGTH = 256;  // one more than max line length in source file //6 CJ
     private static final int RSLASHO = 1;      // file access method (fam) value for read only //5 PSHP
     // Lexicon constants
@@ -174,10 +174,9 @@ public class WebForthVM extends Thread
     private static final int DUPP = 23; // DUP
     private static final int SWAP = 24; // SWAP
     private static final int OVER = 25; // OVER
-    private static final int ROT = 26; // ROT
     //          Holds width of console in characters    //5 CMJ
-
-// .........................................................
+    private static final int ROT = 26; // ROT
+    // .........................................................
     private static final int ZLESS = 27; // 0<
     private static final int ANDD = 28; // AND
     private static final int ORR = 29; // OR
@@ -189,7 +188,6 @@ public class WebForthVM extends Thread
     private static final int DEC = 35; // 1-
     private static final int DEPTH = 36; // DEPTH
     private static final int PICK = 37; // PICK
-    static final int FIND = 38; // FIND
     private static final int UINIT = 39; // UINIT
     private static final int VERBO = 40; // VERBOSE
     private static final int QUIET = 41; // QUIET
@@ -255,26 +253,26 @@ public class WebForthVM extends Thread
             };
     // 256-511 used for non-graphic keys
     private final char[] keybuf;   // Circular buffer
+    private final int[] forthStack;          // Accessible eForth memory
+    private final char[] blkfile;  // simulated file
+    // Reference to Applet
+    private final App app;
+    private final Hashtable<Integer, WebForthFile> files = new Hashtable<>(); // holds references to open files               //5 PSHP
+//    protected int blocks;
+    // --Commented out by Inspection (11/30/2018 8:34 AM):protected int _CODE = CODEE;    // initialize code pointer
+//    protected int _USER = 4 * CELLL;  // first user variable offset
     private int keyp;     // "Put" buffer location
     private int keyg;     // "Get" buffer location
-    private char[] outbuf;   // Circular buffer
+//    private char[] outbuf;   // Circular buffer
     private int outp;     // "Put" buffer location
     private int outg;     // "Get" buffer location
-    private final int[] forthStack;          // Accessible eForth memory
     private int ip;         // instruction pointer
     private int sp;         // parameter stack pointer
     private int rp;         // return stack pointer
     private volatile boolean bGone;    // Indicates time to leave
-    protected int blocks;
-    private final char[] blkfile;  // simulated file
     // Kernel markers
     private int _LINK = 0;        // force a null link
     private int _NAME = NAMEE;    // initialize name pointer
-    protected int _CODE = CODEE;    // initialize code pointer
-    protected int _USER = 4 * CELLL;  // first user variable offset
-    // Reference to Applet
-    private final App app;
-    private final Hashtable<Integer, WebForthFile> files = new Hashtable<>(); // holds references to open files               //5 PSHP
     // File input data                                                                 //5 PSHP
     private int nextFileid = 1;        // used to track assignment of fileids          //5 PSHP
 
@@ -332,23 +330,27 @@ public class WebForthVM extends Thread
         return (key);
     }
 
-    public synchronized int outs ()
-    {
-        if ((outp - outg) >= 0)
-        {
-            return (outp - outg);
-        }
-        else
-        {
-            return (outp + OUTBUFLEN - outg);
-        }
-    }
+// --Commented out by Inspection START (11/30/2018 8:43 AM):
+//    public synchronized int outs ()
+//    {
+//        if ((outp - outg) >= 0)
+//        {
+//            return (outp - outg);
+//        }
+//        else
+//        {
+//            return (outp + OUTBUFLEN - outg);
+//        }
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:43 AM)
 
-    public synchronized void enqueueOutChar (char c)
-    {
-        outbuf[outp] = c;
-        outp = (outp + 1) % OUTBUFLEN;
-    }
+// --Commented out by Inspection START (11/30/2018 8:42 AM):
+//    public synchronized void enqueueOutChar (char c)
+//    {
+//        outbuf[outp] = c;
+//        outp = (outp + 1) % OUTBUFLEN;
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:42 AM)
 
 // This version reads all the source (up to the limit NumBlocks) from the <applet>.HTML file into
 // memory when the applet starts. It is then served up through a set of 8 buffers in classical
@@ -358,45 +360,53 @@ public class WebForthVM extends Thread
 // mechanism. Philip Preston has supplied source to do this. It hasn't been implemented yet as
 // reading is so quick anyway and there are more urgent things than improving purity to do.
 
-    public synchronized char dequeueOutChar ()
-    {
-        char out = outbuf[outg];
-        outg = (outg + 1) % OUTBUFLEN;
-        return (out);
-    }
+// --Commented out by Inspection START (11/30/2018 8:40 AM):
+//    public synchronized char dequeueOutChar ()
+//    {
+//        char out = outbuf[outg];
+//        outg = (outg + 1) % OUTBUFLEN;
+//        return (out);
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:40 AM)
 
-    public void LoadSource (int block, int line, String source)
-    {
-        //Here is an extension that allows an extra character at
-        //the beginning of HTML source blocks so the browser does
-        //not strip leading blanks.
+// --Commented out by Inspection START (11/30/2018 8:41 AM):
+//    public void LoadSource (int block, int line, String source)
+//    {
+//        //Here is an extension that allows an extra character at
+//        //the beginning of HTML source blocks so the browser does
+//        //not strip leading blanks.
+//
+//        if (source.charAt(0) == '~')
+//        {
+//            source = source.substring(1);
+//        }
+//        block--;                    // Blocks start with 1
+//        int i;
+////4 CMJ        for (i = 0 ; i < 64 ; i++)  // Clear the line
+//        for (i = source.length(); i < 64; i++)  // Clear the line
+//        {
+//            blkfile[(block * BLKLEN) + (line * 64) + i] = ' ';
+//        }
+//        for (i = 0; i < source.length(); i++)
+//        {
+//            blkfile[(block * BLKLEN) + (line * 64) + i] = source.charAt(i);
+//        }
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:41 AM)
 
-        if (source.charAt(0) == '~')
-        {
-            source = source.substring(1);
-        }
-        block--;                    // Blocks start with 1
-        int i;
-//4 CMJ        for (i = 0 ; i < 64 ; i++)  // Clear the line
-        for (i = source.length(); i < 64; i++)  // Clear the line
-        {
-            blkfile[(block * BLKLEN) + (line * 64) + i] = ' ';
-        }
-        for (i = 0; i < source.length(); i++)
-        {
-            blkfile[(block * BLKLEN) + (line * 64) + i] = source.charAt(i);
-        }
-    }
+// --Commented out by Inspection START (11/30/2018 8:43 AM):
+//    protected int name ()    // Opening for new word header
+//    {
+//        return forthStack[NP];
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:43 AM)
 
-    protected int name ()    // Opening for new word header
-    {
-        return forthStack[NP];
-    }
-
-    protected int last ()    // Last word added
-    {
-        return forthStack[LAST];
-    }
+// --Commented out by Inspection START (11/30/2018 8:42 AM):
+//    protected int last ()    // Last word added
+//    {
+//        return forthStack[LAST];
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:42 AM)
 
     private void push (int n)
     {
@@ -436,15 +446,19 @@ public class WebForthVM extends Thread
         forthStack[sp + 2] = n;
     }
 
-    public int index ()
-    {
-        return SPP - sp;
-    }
+// --Commented out by Inspection START (11/30/2018 8:42 AM):
+//    public int index ()
+//    {
+//        return SPP - sp;
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:42 AM)
 
-    public void setIndex (int n)
-    {
-        sp = SPP - n;
-    }
+// --Commented out by Inspection START (11/30/2018 8:42 AM):
+//    public void setIndex (int n)
+//    {
+//        sp = SPP - n;
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:42 AM)
 
     private void pick (int n)
     {
@@ -493,7 +507,7 @@ public class WebForthVM extends Thread
     }
 
     //Initialize Vectored Routines
-    private void VInit () throws IOException
+    private void VInit ()
     {
         forthStack[TQKEY] = doFind("?RX");
         forthStack[TEMIT] = doFind("TX!");
@@ -568,7 +582,7 @@ public class WebForthVM extends Thread
         }
         else
         {
-            String s = "Bad Primitive " + String.valueOf(inst)
+            String s = "Bad Primitive " + inst
                     + " in definition of "
                     + makeString(_LINK);
             throw new RuntimeException(s);
@@ -644,7 +658,6 @@ public class WebForthVM extends Thread
             {
                 found = true;
                 ca = forthStack[codeField(w)];
-                na = w;
             }
             else
             {   // get next word
@@ -685,7 +698,7 @@ public class WebForthVM extends Thread
     //////////////////////////////////////////////////////////
 
     // Finds and compiles subroutine call in code dictionary
-    private void call (String name) throws IOException
+    private void call (String name)
     {
         int ca = doFind(name);
         if (ca < 0)
@@ -696,24 +709,26 @@ public class WebForthVM extends Thread
         forthStack[CP]++;            // Increment HERE
     }
 
-    // Simple code dump utility
-    protected void look ()
-    {
-        int start = pop();
-        int count = here() - start;
-        for (int i = 0; i < count; i++)
-        {
-            app.print("[");
-            app.print(String.valueOf(start + i));
-            app.print("]\t");
-            printName(forthStack[start + i]);
-            app.print("\t");
-            app.print(String.valueOf(forthStack[start + i]));
-            app.print("\t");
-            app.print(String.valueOf((char) forthStack[start + i]));
-            app.print("\n");
-        }
-    }
+// --Commented out by Inspection START (11/30/2018 8:44 AM):
+//    // Simple code dump utility
+//    protected void look ()
+//    {
+//        int start = pop();
+//        int count = here() - start;
+//        for (int i = 0; i < count; i++)
+//        {
+//            app.print("[");
+//            app.print(String.valueOf(start + i));
+//            app.print("]\t");
+//            printName(forthStack[start + i]);
+//            app.print("\t");
+//            app.print(String.valueOf(forthStack[start + i]));
+//            app.print("\t");
+//            app.print(String.valueOf((char) forthStack[start + i]));
+//            app.print("\n");
+//        }
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:44 AM)
 
     // eForth Virtual Machine low level stack routines
     private int pop ()
@@ -903,15 +918,17 @@ public class WebForthVM extends Thread
         }
     }
 
-    public void printU (int n)
-    {
-        long l = n;
-        if (l < 0)
-        {
-            l += 0x100000000L;
-        }
-        app.print(String.valueOf(l));
-    }
+// --Commented out by Inspection START (11/30/2018 8:43 AM):
+//    public void printU (int n)
+//    {
+//        long l = n;
+//        if (l < 0)
+//        {
+//            l += 0x100000000L;
+//        }
+//        app.print(String.valueOf(l));
+//    }
+// --Commented out by Inspection STOP (11/30/2018 8:43 AM)
 
     //////////////////////////////////////////////////////////
     // Logic Structure metacompiling routines
@@ -996,7 +1013,7 @@ public class WebForthVM extends Thread
     //////////////////////////////////////////////////////////
     // eForth Kernel for VM
     //////////////////////////////////////////////////////////
-    private void doPrim (int inst) throws IOException
+    private void doPrim (int inst)
     {
         int a, b, c, i, n;     // temporary integers
         char ch;                // temporary character
@@ -1014,7 +1031,7 @@ public class WebForthVM extends Thread
             // ?RX      ( -- c T | F )
             // Return input character and true, or a false if no input.
             case QRX:
-                 yield();
+                yield();
                 if (keys() > 0)
                 {
                     push(dequeueKey());
@@ -1032,7 +1049,7 @@ public class WebForthVM extends Thread
 //4 CMJ                    ch = (char)(pop() & MAX_CHAR);
                 ch = (char) pop();  //4 CMJ
                 app.emitChar(ch);
-                 yield();
+                yield();
                 break;
 
             // !IO      ( -- )  Initialize the serial I/O devices.
@@ -1495,7 +1512,7 @@ public class WebForthVM extends Thread
                 {
                     sleep(pop());
                 }
-                catch (InterruptedException e)
+                catch (InterruptedException ignored)
                 {
                 }
                 break;
@@ -1761,12 +1778,11 @@ public class WebForthVM extends Thread
                     a = pop();                                                 //4 PSHP-2
                     b = pop();                                                 //4 PSHP-2
                     String fileName = addrLenToString(b, a);                   //4 PSHP-2
-                    BufferedInputStream is = null;                             //4 PSHP-2
+                    //4 PSHP-2
                     ByteArrayOutputStream os = new ByteArrayOutputStream();    //4 PSHP-2
-                    try
+                    try (BufferedInputStream is = null)
                     {                                                      //4 PSHP-2
-                        is = null;
-//                        is = new BufferedInputStream(                          //4 PSHP-2
+                        //                        is = new BufferedInputStream(                          //4 PSHP-2
 //                                new URL(app.getCodeBase(), fileName).openStream());  //4 PSHP-2
                         while ((c = is.read()) != -1)
                         {                        //4 PSHP-2
@@ -1778,26 +1794,15 @@ public class WebForthVM extends Thread
                         push(n);
                         push(0);                                      //4 PSHP-2
                     }
-//                    catch (FileNotFoundException e)
-//                    {                        //4 PSHP-2
-//                        push(0);
-//                        push(-38);                                    //4 PSHP-2
-//                    }
                     catch (Exception e)
                     {                                    //4 PSHP-2
                         push(0);
                         push(-37);                                    //4 PSHP-2
-                    }
-                    finally
-                    {                                                //4 PSHP-2
-                        try
-                        {                                                  //4 PSHP-2
-                            is.close();                                        //4 PSHP-2
-                        }
-                        catch (Exception e)
-                        {                                //4 PSHP-2
-                        }                                                      //4 PSHP-2
-                    }                                                          //4 PSHP-2
+                    }                                                //4 PSHP-2
+                    //4 PSHP-2
+                    //4 PSHP-2
+                    //4 PSHP-2
+                    //4 PSHP-2
                 }
                 else
                 {                                                       //4 PSHP-2
@@ -1827,7 +1832,7 @@ public class WebForthVM extends Thread
             //                 -38 - fileid not recognised                     //4 PSHP
             case FILEPOSITION:                                                 //4 PSHP
                 a = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(0);
@@ -1848,7 +1853,7 @@ public class WebForthVM extends Thread
             //                 -38 - fileid not recognised                     //4 PSHP
             case FILESIZE:                                                     //4 PSHP
                 a = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(0);
@@ -1875,7 +1880,7 @@ public class WebForthVM extends Thread
                 a = pop();                                                     //4 PSHP
                 b = pop();                                                     //4 PSHP
                 c = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(0);
@@ -1908,7 +1913,7 @@ public class WebForthVM extends Thread
                 a = pop();                                                     //4 PSHP
                 b = pop();                                                     //4 PSHP
                 c = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(0);
@@ -1941,7 +1946,7 @@ public class WebForthVM extends Thread
                 a = pop();                                                     //4 PSHP
                 b = pop();                                                     //4 PSHP
                 c = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(-38);                                                 //4 PSHP
@@ -1963,7 +1968,7 @@ public class WebForthVM extends Thread
                 a = pop();                                                     //4 PSHP
                 b = pop();                                                     //4 PSHP
                 c = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(0);
@@ -1986,7 +1991,7 @@ public class WebForthVM extends Thread
             //                 -38 - fileid not recognised                     //4 PSHP
             case LINENUMBER:                                                   //4 PSHP
                 a = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(0);
@@ -2006,7 +2011,7 @@ public class WebForthVM extends Thread
             case SETLINENUMBER:                                                //4 PSHP
                 a = pop();                                                     //4 PSHP
                 b = pop();                                                     //4 PSHP
-                file = (WebForthFile) files.get(a);                //4 PSHP
+                file = files.get(a);                //4 PSHP
                 if (file == null)
                 {                                            //4 PSHP
                     push(-38);                                                 //4 PSHP
@@ -2028,7 +2033,7 @@ public class WebForthVM extends Thread
             case REPEATLINE:                                                   //4 PSHP-2
                 a = pop();                                                     //4 PSHP-2
                 b = pop();                                                     //4 PSHP-2
-                file = (WebForthFile) files.get(a);                //4 PSHP-2
+                file = files.get(a);                //4 PSHP-2
                 if (file == null)
                 {                                            //4 PSHP-2
                     push(0);
@@ -2076,7 +2081,7 @@ public class WebForthVM extends Thread
                 n = 0;                                                         //4 PSHP-3
                 if (forthStack[CAPS] == 0)
                 {                                            //4 PSHP-3
-                    char name[] = new char[b];                                 //4 PSHP-3
+                    char[] name = new char[b];                                 //4 PSHP-3
                     for (i = 0; i < b; i++)
                     {                                  //4 PSHP-3
                         name[i] = Character.toUpperCase((char) (forthStack[c + i]));     //4 PSHP-3
@@ -2131,7 +2136,7 @@ public class WebForthVM extends Thread
 
             // Catch any bad tokens
             default:
-                String s = "*** Illegal Instruction. ***" + String.valueOf(inst);
+                String s = "*** Illegal Instruction. ***" + inst;
                 throw new RuntimeException(s);
         }
     }
@@ -2139,7 +2144,7 @@ public class WebForthVM extends Thread
     //////////////////////////////////////////////////////////
     // Build eForth dictionary and high-level words
     //////////////////////////////////////////////////////////
-    private void loadDictionary () throws IOException
+    private void loadDictionary ()
     {
         UInit();            // Initialize User Variables
         sp = SPP;
@@ -2905,11 +2910,11 @@ public class WebForthVM extends Thread
         code(SWAP);
         compAFT(); // branch to FILL2
         mark();    // start of FOR loop
-/*FILL1:*/
+        /*FILL1:*/
         call("2DUP");
         code(CSTOR);
         code(INC);
-/*FILL2:*/
+        /*FILL2:*/
         swap();
         compTHEN();
         compNEXT();
@@ -2922,7 +2927,7 @@ public class WebForthVM extends Thread
         code(TOR);
         compAFT(); // branch to DTRA2
         mark();  // start of FOR loop
-/*DTRA1:*/
+        /*DTRA1:*/
         call("BL");
         code(OVER);
         code(RAT);
@@ -2936,7 +2941,7 @@ public class WebForthVM extends Thread
         compTHEN();
         swap();
         compTHEN();
-/*DTRA2:*/
+        /*DTRA2:*/
         compNEXT();
         literal(0);
         code(PSEMI); // count=0
@@ -3181,16 +3186,16 @@ public class WebForthVM extends Thread
         compTHEN();
         code(SWAP);
         compELSE(); //to NUMQ5
-/*NUMQ4:*/
+        /*NUMQ4:*/
         code(RFROM);
         code(RFROM);
         call("2DROP");
         call("2DROP");
         literal(0);
         compTHEN();
-/*NUMQ5:*/
+        /*NUMQ5:*/
         code(DUPP);
-/*NUMQ6:*/
+        /*NUMQ6:*/
         compTHEN();
         code(RFROM);
         call("2DROP");
@@ -3923,7 +3928,7 @@ public class WebForthVM extends Thread
         code(OVER);
         call("+");
         code(OVER);
-/*ACCP1:*/
+        /*ACCP1:*/
         compBEGIN();
         call("2DUP");
         code(XORR);
@@ -3936,13 +3941,13 @@ public class WebForthVM extends Thread
         compIF();//     DW  QBRAN,ACCP2
         call("TAP");
         compELSE(); // DW   BRAN,ACCP3
-/*ACCP2:*/
+        /*ACCP2:*/
         call("'TAP");
         call("@EXECUTE");
-/*ACCP3:*/
+        /*ACCP3:*/
         compTHEN();
         compREPEAT(); //DW  BRAN,ACCP1
-/*ACCP4:*/
+        /*ACCP4:*/
         code(DROP);
         code(OVER);
         call("-");
@@ -5005,13 +5010,13 @@ public class WebForthVM extends Thread
         code(DROP);                               //1 PSHP
         call("CR");
         compBEGIN();
-/*SEE1:*/
+        /*SEE1:*/
         code(DUPP);
         code(AT);
         code(DUPP); //?does it contain a zero
         compIF();   //DW    QBRAN,SEE2
         call(">NAME");  //?is it a name
-/*SEE2:*/
+        /*SEE2:*/
         compTHEN();
         call("?DUP");       //name address or zero
         compIF();//     DW  QBRAN,SEE3
@@ -5021,7 +5026,7 @@ public class WebForthVM extends Thread
         code(DUPP);
         code(AT);
         call("U.");//display number
-/*SEE4:*/
+        /*SEE4:*/
         compTHEN();
         code(INC);      // <- opt for CELL+
         call("NUF?");       //user control
@@ -7326,50 +7331,41 @@ public class WebForthVM extends Thread
     /////////////////////////////////////////////////////////////
     public void prepare ()
     {
-        try
-        {
-            loadDictionary();
+        loadDictionary();
 
-            ip = doFind("COLD");
-            bGone = false;
-        }
-        catch (IOException e)
-        {
-        }
+        ip = doFind("COLD");
+        bGone = false;
     }
 
     public void run ()
     {
-        //app.showFocus(); //3 CMJ
-        try
+        // Inner interpreter loop
+        while (!bGone)
         {
-            // Inner interpreter loop
-            while (!bGone)
+            try
             {
-                try
+                int inst = forthStack[ip++];     // Read current instruction,
+                // advance instr. pointer
+                if ((forthStack[TRACING] & SHOWING) != 0)
                 {
-                    int inst = forthStack[ip++];     // Read current instruction,
-                    // advance instr. pointer
-                    if ((forthStack[TRACING] & SHOWING) != 0)
-                    {
-                        inform(inst);       // Report state if tracing
-                    }
-                    if (inst > PRIMITIVE)   // Check for primitive bit
-                    {
-                        // Strip off primitive instruction bit,
-                        // execute primitive
-                        //System.err.print(" "+(inst-PRIMITIVE));
-                        doPrim(inst - PRIMITIVE);
-                    }
-                    else                    // Nest into colon word
-                    {
-                        rp--;
-                        forthStack[rp] = ip;         // save ip for return
-                        ip = inst;          // "inst" is word's address
-                    }
+                    inform(inst);       // Report state if tracing
                 }
-                catch (ArrayIndexOutOfBoundsException e)
+                if (inst > PRIMITIVE)   // Check for primitive bit
                 {
+                    // Strip off primitive instruction bit,
+                    // execute primitive
+                    //System.err.print(" "+(inst-PRIMITIVE));
+                    doPrim(inst - PRIMITIVE);
+                }
+                else                    // Nest into colon word
+                {
+                    rp--;
+                    forthStack[rp] = ip;         // save ip for return
+                    ip = inst;          // "inst" is word's address
+                }
+            }
+            catch (ArrayIndexOutOfBoundsException e)
+            {
 //1 PSHP                    app.print(" address");
 //1 PSHP                    // Duplicate Forth THROW
 //1 PSHP                    rp = forthStack[HANDL];
@@ -7380,17 +7376,12 @@ public class WebForthVM extends Thread
 //1 PSHP                    pop();
 //1 PSHP                    push(NULLSTR);  // blank error string
 //1 PSHP                    doPrim(EXIT);
-                    push(-9);              //1 PSHP
-                    forthStack[--rp] = ip;          //1 PSHP
-                    ip = doFind("THROW");  //1 PSHP
-                }
-            } // end while
-            System.exit(1); // bGone == TRUE
-        }
-        catch (IOException e)
-        {
-            String s = "Runtime Exception: " + e.toString();
-            throw new RuntimeException(s);
-        }
+                push(-9);              //1 PSHP
+                forthStack[--rp] = ip;          //1 PSHP
+                ip = doFind("THROW");  //1 PSHP
+            }
+        } // end while
+        System.exit(1); // bGone == TRUE
     }
 }
+
