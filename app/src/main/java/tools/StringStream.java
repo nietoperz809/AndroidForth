@@ -1,4 +1,4 @@
-package noweb;
+package tools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,21 +9,10 @@ import java.nio.charset.StandardCharsets;
 /**
  * Created by Administrator on 4/15/2017.
  */
-
 public class StringStream
 {
-    private final StringSink _mbs;
-    private final ByteArrayOutputStream baos;
-    private final PrintStream ps;
-
-    class myBAStream extends ByteArrayOutputStream
-    {
-        @Override
-        public synchronized void write (byte[] b, int off, int len)
-        {
-            StringStream.this._mbs.post(new String (b, off, len));
-        }
-    }
+    private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private final PrintStream ps = new PrintStream(baos);
 
     public OutputStream getOutputStream()
     {
@@ -38,21 +27,6 @@ public class StringStream
     public void clear()
     {
         baos.reset();
-    }
-
-    public StringStream (StringSink bs)
-    {
-        _mbs = bs;
-        if (bs == null)
-            baos = new ByteArrayOutputStream();
-        else
-            baos = new myBAStream();
-        ps = new PrintStream(baos);
-    }
-
-    public StringStream ()
-    {
-        this (null);
     }
 
     @Override

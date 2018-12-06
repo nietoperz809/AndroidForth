@@ -1,4 +1,4 @@
-package noweb;
+package jforth;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class LineEdit
                     " #nnn      -- Delete line nnn\n" +
                     " ... any other input is appended to the buffer.";
 
-    public LineEdit (PrintStream p)
+    LineEdit (PrintStream p)
     {
         _out = p;
     }
@@ -55,7 +55,7 @@ public class LineEdit
         _out.flush();
     }
 
-    public boolean handleLine (String in)
+    boolean handleLine (String in)
     {
         if (in.startsWith("#"))
         {
@@ -136,9 +136,8 @@ public class LineEdit
                 }
                 else if (cmd.equals("dir")) // show directory
                 {
-                    //String s = Utilities.dir(".");
-                    //_out.println(s.trim());
-                    _out.println("not implemented");
+                    String s = Utilities.dir(".");
+                    _out.println(s.trim());
                 }
                 else if (cmd.equals("x"))   // leave editor
                 {
@@ -190,20 +189,17 @@ public class LineEdit
 
     private void load (String name) throws Exception
     {
-        _out.println("not implemented");
-        //        list = Utilities.fileLoad(name);
+        list = Utilities.fileLoad(name);
     }
 
     private void append (String name) throws Exception
     {
-        _out.println("not implemented");
-//        ArrayList<String> l2 = Utilities.fileLoad(name);
-//        list.addAll(l2);
+        ArrayList<String> l2 = Utilities.fileLoad(name);
+        list.addAll(l2);
     }
 
     private void save (String name) throws Exception
     {
-        _out.println("not implemented");
-//        Utilities.fileSave(list, name);
+        Utilities.fileSave(list, name);
     }
 }

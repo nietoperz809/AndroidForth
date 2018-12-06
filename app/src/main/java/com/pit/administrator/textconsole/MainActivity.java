@@ -11,24 +11,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import noweb.*;
+import jforth.JForth;
+import tools.StringStream;
 
 import static com.pit.administrator.textconsole.R.id.scrollView;
 import static com.pit.administrator.textconsole.R.id.textView;
 
-public class MainActivity extends AppCompatActivity implements App, StringSink
+public class MainActivity extends AppCompatActivity
 {
     private StringBuffer theText = new StringBuffer();
     private TextView myTextView;
     private ScrollView scroll;
+    private EditText edittext;
     private Handler _hand;
-    private WebForthVM webForthVM;
 
-    public enum MODE {EDIT, DIRECT}
-    public MODE mode = MODE.DIRECT;
-    private LineEdit _editor;
-
-    public void post (final CharSequence txt)
+    public void print (final CharSequence txt)
     {
         _hand.post(() ->
         {
@@ -38,24 +35,21 @@ public class MainActivity extends AppCompatActivity implements App, StringSink
         });
     }
 
-    @Override
-    protected void onCreate (Bundle savedInstanceState)
+    private void handleInputLine (String in)
     {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar =  findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        StringStream _ss = new StringStream();
+        JForth _forth = new JForth(_ss.getPrintStream());
+        _forth.singleShot(in);
+        print (_ss.toString());
+    }
 
+    private void init()
+    {
         myTextView = findViewById(textView);
         scroll = findViewById(scrollView);
+        edittext  =  findViewById(R.id.edittext);
         _hand = new Handler();
-        _editor = new LineEdit(new StringStream(this).getPrintStream());
 
-        webForthVM = new WebForthVM(this);
-        webForthVM.prepare();
-        webForthVM.start();
-
-        final EditText edittext =  findViewById(R.id.edittext);
         edittext.setOnKeyListener((v, keyCode, event) ->
         {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
@@ -69,32 +63,14 @@ public class MainActivity extends AppCompatActivity implements App, StringSink
         });
     }
 
-    private void handleInputLine (String s)
+    @Override
+    protected void onCreate (Bundle savedInstanceState)
     {
-        if (mode == MODE.DIRECT)
-        {
-            if (s.equals ("editor"))
-            {
-                mode = MODE.EDIT;
-                //post ("Type #h for help ...");
-                _editor.handleLine("#h");
-            }
-            else
-            {
-                for (int l = 0; l < s.length(); l++)
-                {
-                    webForthVM.enqueueKey(s.charAt(l));
-                }
-                webForthVM.enqueueKey('\n');
-            }
-        }
-        else // mode == EDIT
-        {
-            if (!_editor.handleLine(s))
-            {
-                mode = MODE.DIRECT;
-            }
-        }
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar =  findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        init();
     }
 
     @Override
@@ -116,34 +92,9 @@ public class MainActivity extends AppCompatActivity implements App, StringSink
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings)
         {
-            //textOut(""+System.currentTimeMillis());
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public int cursor ()
-    {
-        return 0;
-    }
-
-    @Override
-    public void clear ()
-    {
-
-    }
-
-    @Override
-    public void print (String s)
-    {
-        post(s);
-    }
-
-    @Override
-    public void emitChar (char c)
-    {
-        post (""+c);
     }
 }
