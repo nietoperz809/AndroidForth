@@ -1,5 +1,6 @@
 package jforth.forthwords;
 
+import android.util.Base64;
 import jforth.*;
 
 import java.io.UnsupportedEncodingException;
@@ -8,7 +9,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Base64;
 
 //import javax.script.ScriptEngine;
 //import javax.script.ScriptEngineManager;
@@ -121,8 +121,9 @@ class Filler2
                             try
                             {
                                 String ss = Utilities.readString(dStack);
-                                byte[] bytes = ss.getBytes("ISO-8859-1");
-                                String encoded = Base64.getEncoder().encodeToString(bytes);
+                                byte[] bytes = ss.getBytes(JForth.ENCODING);
+                                String encoded = Base64.encodeToString(bytes,
+                                        Base64.NO_WRAP | Base64.URL_SAFE);
                                 dStack.push(encoded);
                                 return 1;
                             }
@@ -141,7 +142,7 @@ class Filler2
                             try
                             {
                                 String ss = Utilities.readString(dStack);
-                                byte[] decoded = Base64.getDecoder().decode(ss);
+                                byte[] decoded = android.util.Base64.decode(ss, Base64.DEFAULT);
                                 String b2 = new String(decoded, JForth.ENCODING);
                                 dStack.push(b2);
                                 return 1;

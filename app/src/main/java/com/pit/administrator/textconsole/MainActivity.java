@@ -19,44 +19,45 @@ import static com.pit.administrator.textconsole.R.id.textView;
 
 public class MainActivity extends AppCompatActivity
 {
-    private StringBuffer theText = new StringBuffer();
-    private TextView myTextView;
-    private ScrollView scroll;
-    private EditText edittext;
+    //private StringBuffer _theText = new StringBuffer();
+    private TextView _myTextView;
+    private ScrollView _scroll;
+    private EditText _edittext;
     private Handler _hand;
+    private StringStream _ss;
+    private JForth _forth;
 
     public void print (final CharSequence txt)
     {
         _hand.post(() ->
         {
-            theText.append(txt);
-            myTextView.setText(theText);
-            scroll.fullScroll(View.FOCUS_DOWN);
+            _myTextView.append(txt);
+            _scroll.post(() -> _scroll.fullScroll(View.FOCUS_DOWN));
         });
     }
 
     private void handleInputLine (String in)
     {
-        StringStream _ss = new StringStream();
-        JForth _forth = new JForth(_ss.getPrintStream());
         _forth.singleShot(in);
         print (_ss.toString());
     }
 
     private void init()
     {
-        myTextView = findViewById(textView);
-        scroll = findViewById(scrollView);
-        edittext  =  findViewById(R.id.edittext);
+        _myTextView = findViewById(textView);
+        _scroll = findViewById(scrollView);
+        _edittext =  findViewById(R.id.edittext);
         _hand = new Handler();
+        _ss = new StringStream();
+        _forth = new JForth(_ss.getPrintStream());
 
-        edittext.setOnKeyListener((v, keyCode, event) ->
+        _edittext.setOnKeyListener((v, keyCode, event) ->
         {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                     (keyCode == KeyEvent.KEYCODE_ENTER))
             {
-                handleInputLine (edittext.getText().toString());
-                edittext.getText().clear();
+                handleInputLine (_edittext.getText().toString());
+                _edittext.getText().clear();
                 return true;
             }
             return false;
