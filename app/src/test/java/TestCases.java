@@ -23,7 +23,7 @@ public class TestCases
     {
         StringStream _ss = new StringStream();
         JForth _forth = new JForth(_ss.getPrintStream());
-//        _forth.setPrintStream(_ss.getPrintStream());
+
         _forth.singleShot(prg);
         if (call != null)
         {
@@ -723,5 +723,12 @@ public class TestCases
     {
         String s = check ("7919 isPrime 12 isPrime swap","..");
         Assert.assertEquals("10"+EP, s);
+    }
+
+    @Test
+    public void TestB64()
+    {
+        String s = check ("\"hoelle\" b64 dup unb64",". sp .");
+        Assert.assertEquals("hoelle aG9lbGxl"+EP, s);
     }
 }
