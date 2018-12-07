@@ -12,8 +12,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import jforth.JForth;
-import tools.StringStream;
 
 import static com.pit.administrator.textconsole.R.id.scrollView;
 import static com.pit.administrator.textconsole.R.id.textView;
@@ -25,8 +23,7 @@ public class MainActivity extends AppCompatActivity
     private ScrollView _scroll;
     private EditText _edittext;
     private Handler _hand;
-    private StringStream _ss;
-    private JForth _forth;
+    private ForthRunner _runner;
 
     public static Activity getActivity()
     {
@@ -42,31 +39,21 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private void handleInputLine (String in)
-    {
-        new Thread(() ->
-        {
-            _forth.singleShot(in);
-            print(_ss.toString());
-        }).start();
-    }
-
     private void init()
     {
         act = this;
+        _runner = new ForthRunner(this);
         _myTextView = findViewById(textView);
         _scroll = findViewById(scrollView);
         _edittext =  findViewById(R.id.edittext);
         _hand = new Handler();
-        _ss = new StringStream();
-        _forth = new JForth(_ss.getPrintStream());
 
         _edittext.setOnKeyListener((v, keyCode, event) ->
         {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                     (keyCode == KeyEvent.KEYCODE_ENTER))
             {
-                handleInputLine (_edittext.getText().toString());
+                _runner.send (_edittext.getText().toString());
                 _edittext.getText().clear();
                 return true;
             }
