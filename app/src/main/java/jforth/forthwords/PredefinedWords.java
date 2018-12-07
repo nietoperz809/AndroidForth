@@ -21,6 +21,7 @@ public class PredefinedWords
         this._jforth = jf;
         Filler1.fill(wl, this);
         Filler2.fill(wl, this);
+        AndroidFiller.fill (wl, this);
     }
 
     /**

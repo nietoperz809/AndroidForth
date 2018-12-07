@@ -5,10 +5,7 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.fraction.Fraction;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -121,10 +118,10 @@ public class JForth
     /**
      * Main loop
      */
-    private void mainLoop ()
+    private void mainLoop (InputStream in)
     {
         dStack.removeAllElements();
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(in);
         _out.println(Utilities.buildInfo);
         singleShot ("\n"); // to show prompt immediately
         try

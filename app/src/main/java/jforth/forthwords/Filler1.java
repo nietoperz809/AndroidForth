@@ -31,7 +31,6 @@ class Filler1
 {
     public static final Random random = new Random();
 
-
     static void fill (WordsList _fw, PredefinedWords predefinedWords)
     {
         // do nothing. comments handled by tokenizer

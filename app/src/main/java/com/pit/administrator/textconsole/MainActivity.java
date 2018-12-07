@@ -1,5 +1,6 @@
 package com.pit.administrator.textconsole;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -19,13 +20,18 @@ import static com.pit.administrator.textconsole.R.id.textView;
 
 public class MainActivity extends AppCompatActivity
 {
-    //private StringBuffer _theText = new StringBuffer();
+    private static Activity act;
     private TextView _myTextView;
     private ScrollView _scroll;
     private EditText _edittext;
     private Handler _hand;
     private StringStream _ss;
     private JForth _forth;
+
+    public static Activity getActivity()
+    {
+        return act;
+    }
 
     public void print (final CharSequence txt)
     {
@@ -38,12 +44,16 @@ public class MainActivity extends AppCompatActivity
 
     private void handleInputLine (String in)
     {
-        _forth.singleShot(in);
-        print (_ss.toString());
+        new Thread(() ->
+        {
+            _forth.singleShot(in);
+            print(_ss.toString());
+        }).start();
     }
 
     private void init()
     {
+        act = this;
         _myTextView = findViewById(textView);
         _scroll = findViewById(scrollView);
         _edittext =  findViewById(R.id.edittext);
