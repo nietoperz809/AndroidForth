@@ -863,7 +863,7 @@ public class Utilities
     {
         if (original == null || pattern == null)
             return true;
-        return original.toLowerCase().contains(pattern.toLowerCase());
+        return original.toUpperCase().contains(pattern.toUpperCase());
     }
 
     /**

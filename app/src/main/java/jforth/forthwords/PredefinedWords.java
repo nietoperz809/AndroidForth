@@ -8,12 +8,12 @@ import jforth.WordsList;
 
 public class PredefinedWords
 {
-    private static final String IMMEDIATE = "__immediate";
+    private static final String IMMEDIATE = "__IMMEDIATE"; // must be uppercase !!!
     final JForth _jforth;
     final WordsList _wl;
 
-    public static final String SAVEHIST = "saveHist";
-    public static final String PLAYHIST = "playHist";
+    public static final String SAVEHIST = "saveHist".toUpperCase();
+    public static final String PLAYHIST = "playHist".toUpperCase();
 
     public PredefinedWords (JForth jf, WordsList wl)
     {

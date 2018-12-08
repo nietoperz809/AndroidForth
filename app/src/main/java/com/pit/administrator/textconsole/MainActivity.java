@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,9 +34,10 @@ public class MainActivity extends AppCompatActivity
     {
         _hand.post(() ->
         {
-            if (txt.startsWith(CLS))
+            int pos = txt.indexOf(CLS);
+            if (pos >= 0)
             {
-                _myTextView.setText(txt.substring(CLS.length()));
+                _myTextView.setText(txt.substring(pos+CLS.length()));
             }
             else
             {
@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar =  findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar =  findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
         init();
     }
 
