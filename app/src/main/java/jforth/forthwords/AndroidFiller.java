@@ -3,12 +3,12 @@ package jforth.forthwords;
 import android.app.Dialog;
 import android.hardware.Camera;
 import android.support.v7.app.AlertDialog;
+import com.pit.administrator.textconsole.MyApp;
 import jforth.JForth;
 import jforth.PrimitiveWord;
 import jforth.Utilities;
 import jforth.WordsList;
 
-import static com.pit.administrator.textconsole.MainActivity.getActivity;
 
 public class AndroidFiller
 {
@@ -69,11 +69,11 @@ public class AndroidFiller
                             {
                                 final String txt = Utilities.readString (dStack);
                                 final Thread tr = Thread.currentThread();
-                                getActivity().runOnUiThread(() ->
+                                MyApp.getInstance().getActivity().runOnUiThread(() ->
                                 {
                                     // Use the Builder class for convenient dialog construction
                                     AlertDialog.Builder builder =
-                                            new AlertDialog.Builder(getActivity());
+                                            new AlertDialog.Builder(MyApp.getInstance().getActivity());
                                     builder.setTitle(txt);
                                     builder.setPositiveButton("Got that", (dialog, id) ->
                                     {
@@ -108,11 +108,11 @@ public class AndroidFiller
                             {
                                 final String txt = Utilities.readString (dStack);
                                 final Thread tr = Thread.currentThread();
-                                getActivity().runOnUiThread(() ->
+                                MyApp.getInstance().getActivity().runOnUiThread(() ->
                                 {
                                     // Use the Builder class for convenient dialog construction
                                     AlertDialog.Builder builder =
-                                            new AlertDialog.Builder(getActivity());
+                                            new AlertDialog.Builder(MyApp.getInstance().getActivity());
                                     builder.setTitle(txt+"?");
                                     builder.setPositiveButton("Yes", (dialog, id) ->
                                     {

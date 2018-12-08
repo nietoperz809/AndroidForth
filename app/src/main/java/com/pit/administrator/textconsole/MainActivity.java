@@ -1,6 +1,5 @@
 package com.pit.administrator.textconsole;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -17,18 +16,12 @@ import static com.pit.administrator.textconsole.R.id.textView;
 
 public class MainActivity extends AppCompatActivity
 {
-    private static Activity act;
     private TextView _myTextView;
     private ScrollView _scroll;
     private EditText _edittext;
     private Handler _hand;
     private ForthRunner _runner;
     private static final String CLS = "\u001b[2J";
-
-    public static Activity getActivity()
-    {
-        return act;
-    }
 
     public void print (final String txt)
     {
@@ -49,7 +42,6 @@ public class MainActivity extends AppCompatActivity
 
     private void init()
     {
-        act = this;
         _runner = new ForthRunner(this);
         _myTextView = findViewById(textView);
         _scroll = findViewById(scrollView);
@@ -74,8 +66,6 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        Toolbar toolbar =  findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
         init();
     }
 
