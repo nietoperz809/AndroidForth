@@ -185,8 +185,7 @@ public class JForth
 
     public String ObjectToString (Object o)
     {
-        String out = makePrintable(o);
-        return out;
+        return makePrintable(o);
     }
 
     /**
@@ -333,8 +332,10 @@ public class JForth
             dStack.push(new PolynomialFunction(pd));
             return true;
         }
-        _out.print(word + " ?");
-        return false;
+        dStack.push (word); // as String
+        return true;
+        //_out.print(word + " ?");
+        //return false;
     }
 
     private String handleDirectStringOut (String word, boolean compile) throws Exception

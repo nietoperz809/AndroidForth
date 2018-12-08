@@ -9,6 +9,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.TimerTask;
 
 //import javax.script.ScriptEngine;
 //import javax.script.ScriptEngineManager;
@@ -547,76 +548,6 @@ class Filler2
                         }
                 ));
 
-//        _fw.add(new PrimitiveWord
-//                (
-//                        "msg", false, "Show message box",
-//                        (dStack, vStack) ->
-//                        {
-//                            try
-//                            {
-//                                String txt = Utilities.readString (dStack);
-//                                JOptionPane.showMessageDialog(null,
-//                                        txt,
-//                                        "JForth",
-//                                        JOptionPane.PLAIN_MESSAGE);
-//                                return 1;
-//                            }
-//                            catch (Exception e)
-//                            {
-//                                return 0;
-//                            }
-//                        }
-//                ));
-
-//        _fw.add(new PrimitiveWord
-//                (
-//                        "ask", false, "Show yes/no box",
-//                        (dStack, vStack) ->
-//                        {
-//                            try
-//                            {
-//                                String txt = Utilities.readString (dStack);
-//                                int dialogResult = JOptionPane.showConfirmDialog(null,
-//                                        txt+"?",
-//                                        "Jforth", JOptionPane.YES_NO_OPTION);
-//                                if (dialogResult == 0)
-//                                    dStack.push(JForth.TRUE);
-//                                else
-//                                    dStack.push(JForth.FALSE);
-//                                return 1;
-//                            }
-//                            catch (Exception e)
-//                            {
-//                                return 0;
-//                            }
-//                        }
-//                ));
-
-
-//        _fw.add(new PrimitiveWord
-//                (
-//                        "asyncmsg", false, "Show asynchronous message box",
-//                        (dStack, vStack) ->
-//                        {
-//                            try
-//                            {
-//                                String txt = Utilities.readString (dStack);
-//                                new Thread(() ->
-//                                {
-//                                    JOptionPane.showMessageDialog(null,
-//                                            txt,
-//                                            "JForth",
-//                                            JOptionPane.PLAIN_MESSAGE);
-//                                }).start();
-//                                return 1;
-//                            }
-//                            catch (Exception e)
-//                            {
-//                                return 0;
-//                            }
-//                        }
-//                ));
-
         _fw.add(new PrimitiveWord
                 (
                         "what", false, "Show description about a word",
@@ -679,6 +610,65 @@ class Filler2
                             {
                                 return 0;
                             }
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "toTime", false, "make time string from TOS",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                Long v = Utilities.readLong(dStack);
+                                dStack.push(Utilities.toTimeView(v));
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "soon", false, "run deferred word",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                final long delay = Utilities.readLong(dStack);
+                                final Object o = dStack.pop();
+                                if (o instanceof BaseWord)
+                                {
+                                    final BaseWord bw = (BaseWord) o;
+
+                                    new java.util.Timer().schedule(new TimerTask()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            bw.execute(dStack, vStack);
+                                        }
+                                    },delay);
+                                    return 1;
+                                }
+                            }
+                            catch (Exception unused)
+                            {
+                            }
+                            return 0;
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "cls", false, "clear screen",
+                        (dStack, vStack) ->
+                        {
+                            predefinedWords._jforth._out.print("\u001b[2J");
+                            return 1;
                         }
                 ));
 

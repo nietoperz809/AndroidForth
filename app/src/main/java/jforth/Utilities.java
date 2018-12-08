@@ -99,6 +99,45 @@ public class Utilities
         return a;
     }
 
+    /**
+     * Makes seconds from hh:mm:ss format
+     * @param in input string
+     * @return value in seconds
+     */
+    public static Long parseTimer (String in)
+    {
+        String[] parts = in.split(":");
+        if (parts.length != 3)
+            return null;
+        try
+        {
+            int h = Integer.parseInt(parts[0]);
+            if (h<0)
+                return null;
+            int m = Integer.parseInt(parts[1]);
+            if (m<0 || m>59)
+                return null;
+            int s = Integer.parseInt(parts[2]);
+            if (s<0 || s>59)
+                return null;
+            return (long)(3600*h + 60*m + s);
+        }
+        catch (NumberFormatException e)
+        {
+            return null;
+        }
+    }
+
+    public static String toTimeView (Long in)
+    {
+        int h = (int)(in/3600);
+        int s = (int)(in%3600);
+        int m = (int)(s/60);
+        s %= 60;
+        return String.format("%d:%02d:%02d", h,m,s);
+    }
+
+
     public static byte[] toRawByteArray (String in)
     {
         char[] chars = in.toCharArray();
@@ -317,7 +356,7 @@ public class Utilities
         }
         catch (Exception ignored)
         {
-            return null;
+            return parseTimer (word);
         }
     }
 
@@ -828,10 +867,9 @@ public class Utilities
     }
 
     /**
-     * Copy resource from jar to temp polder
+     * Copy resource from jar to temp folder
      * @param name name of resource
      * @return Full path to extracted file
-     * @throws IOException if smth gone wrong
      */
     static public String extractResource (String name) throws IOException
     {

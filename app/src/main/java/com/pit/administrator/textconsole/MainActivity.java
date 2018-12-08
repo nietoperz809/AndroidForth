@@ -24,17 +24,25 @@ public class MainActivity extends AppCompatActivity
     private EditText _edittext;
     private Handler _hand;
     private ForthRunner _runner;
+    private static final String CLS = "\u001b[2J";
 
     public static Activity getActivity()
     {
         return act;
     }
 
-    public void print (final CharSequence txt)
+    public void print (final String txt)
     {
         _hand.post(() ->
         {
-            _myTextView.append(txt);
+            if (txt.startsWith(CLS))
+            {
+                _myTextView.setText(txt.substring(CLS.length()));
+            }
+            else
+            {
+                _myTextView.append(txt);
+            }
             _scroll.post(() -> _scroll.fullScroll(View.FOCUS_DOWN));
         });
     }

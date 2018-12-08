@@ -35,6 +35,7 @@ public class ForthRunner extends Thread
             {
                 _forth.singleShot(que.take());
                 _ma.print(_ss.toString());
+                _ss.clear();
             }
             catch (InterruptedException unused)
             {
