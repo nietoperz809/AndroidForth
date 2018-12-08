@@ -53,7 +53,9 @@ public class MainActivity extends AppCompatActivity
             if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                     (keyCode == KeyEvent.KEYCODE_ENTER))
             {
-                _runner.send (_edittext.getText().toString());
+                String ss = _edittext.getText().toString();
+                print (ss+"\n");
+                _runner.send (ss);
                 _edittext.getText().clear();
                 return true;
             }

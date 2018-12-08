@@ -672,5 +672,16 @@ class Filler2
                         }
                 ));
 
+        _fw.add(new PrimitiveWord
+                (
+                        "nip", false, "same as swap+drop",
+                        (dStack, vStack) ->
+                        {
+                            Object o1 = dStack.pop();
+                            dStack.pop();
+                            dStack.push(o1);
+                            return 1;
+                        }
+                ));
     }
 }

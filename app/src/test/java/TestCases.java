@@ -731,4 +731,12 @@ public class TestCases
         String s = check ("\"hoelle\" b64 dup unb64",". sp .");
         Assert.assertEquals("hoelle aG9lbGxl"+EP, s);
     }
+
+    @Test
+    public void TestNip()
+    {
+        String s = check ("a b c nip",".s");
+        Assert.assertEquals("a c "+EP, s);
+    }
+
 }
