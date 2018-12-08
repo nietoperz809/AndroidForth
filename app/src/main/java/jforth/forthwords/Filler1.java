@@ -1350,6 +1350,24 @@ class Filler1
 
         _fw.add(new PrimitiveWord
                 (
+                        "recursive", true, "Re-run current word",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                predefinedWords._jforth.currentWord =
+                                        predefinedWords._jforth.wordBeingDefined;
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
                         ":", false, "Begin word definition",
                         (dStack, vStack) ->
                         {

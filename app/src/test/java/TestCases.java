@@ -733,10 +733,27 @@ public class TestCases
     }
 
     @Test
+    public void TestTimeView()
+    {
+        String s = check ("123456 toTime",".");
+        Assert.assertEquals("34:17:36"+EP, s);
+        s = check ("34:17:36",".");
+        Assert.assertEquals("123456"+EP, s);
+    }
+
+    @Test
     public void TestNip()
     {
         String s = check ("a b c nip",".s");
         Assert.assertEquals("a c "+EP, s);
     }
+
+    @Test
+    public void TestNonStandardRecurse()
+    {
+        String s = check (": facky recursive dup 1 > if dup 1- facky * then ;","6 facky .");
+        Assert.assertEquals("720"+EP, s);
+    }
+
 
 }
