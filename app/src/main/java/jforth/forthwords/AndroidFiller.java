@@ -8,6 +8,8 @@ import jforth.JForth;
 import jforth.PrimitiveWord;
 import jforth.Utilities;
 import jforth.WordsList;
+import jforth.waves.Wave16;
+import jforth.waves.WaveForms;
 
 
 public class AndroidFiller
@@ -56,6 +58,28 @@ public class AndroidFiller
                         {
                             flashLight(false);
                             return 1;
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "sinWav", false, "Vake sinus wave",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                double freq = Utilities.readDouble(dStack); // Hz
+                                int len = (int)Utilities.readLong(dStack);  // milliseconds
+                                Wave16 wv = WaveForms.curveSine(11000,
+                                        11*len,
+                                        freq, 0);
+                                dStack.push(wv.toString());
+                                return 1;
+                            }
+                            catch (Exception unused)
+                            {
+                                return 0;
+                            }
                         }
                 ));
 

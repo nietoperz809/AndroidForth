@@ -1,5 +1,8 @@
 package jforth.forthwords;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import jforth.*;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
@@ -29,7 +32,21 @@ import static org.mathIT.numbers.Riemann.zeta;
 
 class Filler1
 {
-    public static final Random random = new Random();
+    static private final Random random = new Random();
+    static private final int SAMPLERATE = 11000;
+    static private final int BUFFERSIZE = 11000 * 2;
+
+//    static private AudioTrack _track = null;
+//    static void startAudio()
+//    {
+//        if (_track == null)
+//        {
+//            _track = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLERATE, AudioFormat.CHANNEL_OUT_MONO,
+//                    AudioFormat.ENCODING_PCM_16BIT, BUFFERSIZE, AudioTrack.MODE_STREAM);
+//            _track.play();
+//        }
+//    }
+
 
     static void fill (WordsList _fw, PredefinedWords predefinedWords)
     {
@@ -1964,26 +1981,33 @@ class Filler1
 //                        }
 //                ));
 
-//        _fw.add(new PrimitiveWord
-//                (
-//                        "playStr", false, "Play Wave String",
-//                        (dStack, vStack) ->
-//                        {
-//                            try
-//                            {
-//                                String o1 = Utilities.readString(dStack);
-//                                WavePlayer ae = new WavePlayer();
-//                                ae.loadString(o1);
-//                                ae.start();
-//                                return 1;
-//                            }
-//                            catch (Exception e)
-//                            {
-//                                return 0;
-//                            }
-//                        }
-//                ));
-//
+        _fw.add(new PrimitiveWord
+                (
+                        "playStr", false, "Play Wave String",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                String o1 = Utilities.readString(dStack);
+                                short[] arr = Utilities.toShortArray(o1);
+
+                                AudioTrack tr = new AudioTrack(AudioManager.STREAM_MUSIC,
+                                        SAMPLERATE,
+                                        AudioFormat.CHANNEL_OUT_MONO,
+                                        AudioFormat.ENCODING_PCM_16BIT,
+                                        arr.length,
+                                        AudioTrack.MODE_STREAM);
+                                tr.write (arr, 0, arr.length);
+                                tr.play();
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
 //        _fw.add(new PrimitiveWord
 //                (
 //                        "playFile", false, "Play Wave audio file",

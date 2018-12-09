@@ -20,7 +20,7 @@ import java.util.List;
 public class Utilities
 {
     private static final String BUILD_NUMBER = "1263";
-    private static final String BUILD_DATE = "12/06/2018 09:12:27 AM";
+    private static final String BUILD_DATE = "12/09/2018 12:37:55 AM";
 
     public static final String buildInfo = "JForth, Build: " + Utilities.BUILD_NUMBER + ", " + Utilities.BUILD_DATE
             + " -- " + System.getProperty("java.version");
@@ -137,6 +137,17 @@ public class Utilities
         return String.format("%d:%02d:%02d", h,m,s);
     }
 
+
+    public static short[] toShortArray (String in)
+    {
+        char[] chars = in.toCharArray();
+        short[] shorts = new short[chars.length];
+        for(int i=0; i<chars.length; i++)
+        {
+            shorts[i] = (short) chars[i];
+        }
+        return shorts;
+    }
 
     public static byte[] toRawByteArray (String in)
     {
