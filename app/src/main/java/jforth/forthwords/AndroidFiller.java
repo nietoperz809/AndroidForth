@@ -4,10 +4,7 @@ import android.app.Dialog;
 import android.hardware.Camera;
 import android.support.v7.app.AlertDialog;
 import com.pit.administrator.textconsole.MyApp;
-import jforth.JForth;
-import jforth.PrimitiveWord;
-import jforth.Utilities;
-import jforth.WordsList;
+import jforth.*;
 import jforth.waves.Wave16;
 import jforth.waves.WaveForms;
 
@@ -38,6 +35,47 @@ public class AndroidFiller
         }
     }
 
+    private static int executeSine (OStack dStack, OStack vStack)
+    {
+        return genWave(dStack, WaveForms::curveSine);
+    }
+
+    private static int executeRect (OStack dStack, OStack vStack)
+    {
+        return genWave(dStack, WaveForms::curveRect);
+    }
+
+    private static int executeSaw (OStack dStack, OStack vStack)
+    {
+        return genWave(dStack, WaveForms::curveSawTooth);
+    }
+
+    private static int executeTri (OStack dStack, OStack vStack)
+    {
+        return genWave(dStack, WaveForms::curveTriangle);
+    }
+
+    interface WaveGen
+    {
+        Wave16 gen (int rate, int len, double freq, int startval);
+    }
+
+    private static int genWave (OStack dStack, WaveGen wvg)
+    {
+        try
+        {
+            double freq = Utilities.readDouble(dStack); // Hz
+            int len = (int)Utilities.readLong(dStack);  // milliseconds
+            Wave16 wv = wvg.gen(11000,11*len,freq, 0);
+            dStack.push(wv.toString());
+            return 1;
+        }
+        catch (Exception unused)
+        {
+            return 0;
+        }
+    }
+
 
     static void fill (WordsList _fw, PredefinedWords predefinedWords)
     {
@@ -63,26 +101,27 @@ public class AndroidFiller
 
         _fw.add(new PrimitiveWord
                 (
-                        "sinWav", false, "Vake sinus wave",
-                        (dStack, vStack) ->
-                        {
-                            try
-                            {
-                                double freq = Utilities.readDouble(dStack); // Hz
-                                int len = (int)Utilities.readLong(dStack);  // milliseconds
-                                Wave16 wv = WaveForms.curveSine(11000,
-                                        11*len,
-                                        freq, 0);
-                                dStack.push(wv.toString());
-                                return 1;
-                            }
-                            catch (Exception unused)
-                            {
-                                return 0;
-                            }
-                        }
+                        "sinWav", false, "Make sinus wave",
+                        AndroidFiller::executeSine
                 ));
 
+        _fw.add(new PrimitiveWord
+                (
+                        "rectWav", false, "Make rectangle wave",
+                        AndroidFiller::executeRect
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "sawWav", false, "Make sawrooth wave",
+                        AndroidFiller::executeSaw
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "triWav", false, "Make triangle wave",
+                        AndroidFiller::executeTri
+                ));
 
         _fw.add(new PrimitiveWord
                 (

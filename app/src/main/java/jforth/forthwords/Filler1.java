@@ -1988,8 +1988,7 @@ class Filler1
                         {
                             try
                             {
-                                String o1 = Utilities.readString(dStack);
-                                short[] arr = Utilities.toShortArray(o1);
+                                short[] arr = Utilities.toShortArray(Utilities.readString(dStack));
 
                                 AudioTrack tr = new AudioTrack(AudioManager.STREAM_MUSIC,
                                         SAMPLERATE,

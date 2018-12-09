@@ -49,13 +49,13 @@ public class Wave16
         waveType = t;
     }
 
-    public static Wave16 extractSamples(Wave16 source, int from, int to)
-    {
-        int len = to - from;
-        Wave16 res = new Wave16(len, source.samplingRate);
-        System.arraycopy(source.data, from, res.data, 0, len);
-        return res;
-    }
+//    public static Wave16 extractSamples(Wave16 source, int from, int to)
+//    {
+//        int len = to - from;
+//        Wave16 res = new Wave16(len, source.samplingRate);
+//        System.arraycopy(source.data, from, res.data, 0, len);
+//        return res;
+//    }
 
 
     /**
@@ -70,20 +70,20 @@ public class Wave16
         //out.setName(Thread.currentThread().getStackTrace()[2].getMethodName());
     }
 
-    /**
-     * Returns whole array as 'short' values
-     *
-     * @return The new 'short' array
-     */
-    public short[] toShortArray()
-    {
-        short[] res = new short[data.length];
-        for (int s = 0; s < data.length; s++)
-        {
-            res[s] = (short) data[s];
-        }
-        return res;
-    }
+//    /**
+//     * Returns whole array as 'short' values
+//     *
+//     * @return The new 'short' array
+//     */
+//    public short[] toShortArray()
+//    {
+//        short[] res = new short[data.length];
+//        for (int s = 0; s < data.length; s++)
+//        {
+//            res[s] = (short) data[s];
+//        }
+//        return res;
+//    }
 
     /**
      * Implements the standard toString
