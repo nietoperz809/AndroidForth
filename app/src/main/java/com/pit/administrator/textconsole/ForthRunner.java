@@ -21,11 +21,18 @@ public class ForthRunner extends Thread
         start();
     }
 
-    public void send (String s)
+    /**
+     * Receive input
+     * @param s Line of text
+     */
+    public void receive (String s)
     {
         que.offer(s);
     }
 
+    /**
+     * Forth thread
+     */
     public void run()
     {
         _ma.print (Utilities.buildInfo+"\n");

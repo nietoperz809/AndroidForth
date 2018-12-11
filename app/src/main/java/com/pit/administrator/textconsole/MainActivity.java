@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
             {
                 String ss = _edittext.getText().toString();
                 print (ss+"\n");
-                _runner.send (ss);
+                _runner.receive(ss);
                 _edittext.getText().clear();
                 return true;
             }

@@ -88,7 +88,6 @@ public class Wave16
     /**
      * Implements the standard toString
      *
-     * @return A string describing this object
      */
     @Override
     public String toString()
@@ -135,6 +134,56 @@ public class Wave16
         out.data[data.length - 1] = out.data[data.length - 2];
         out.data = fitValues(out.data);
         return out;
+    }
+
+    /**
+     * Write int as 4 bytes into array in reverse order
+     * @param i the Int
+     * @param dest destination array
+     * @param offs offset that are written to
+     */
+    private static void intToBytes (int i, byte[] dest, int offs)
+    {
+        dest[offs] = (byte) (i & 0x00FF);
+        dest[1+offs] = (byte) ((i >> 8) & 0x000000FF);
+        dest[2+offs] = (byte) ((i >> 16) & 0x000000FF);
+        dest[3+offs] = (byte) ((i >> 24) & 0x000000FF);
+    }
+
+    /**
+     * Create Wav header for PCM signed, 16 bits, mono, 11025 samples/sec
+     * @param raw raw sample data
+     * @return header+samples
+     */
+    public static byte[] makeHeader11025 (byte[] raw)
+    {
+        byte[] headerdata =
+                {
+                        0x52, 0x49, 0x46, 0x46, 0x38, 0x00, 0x00, 0x00, 0x57, 0x41,
+                        0x56, 0x45, 0x66, 0x6D, 0x74, 0x20, 0x10, 0x00, 0x00, 0x00,
+                        0x01, 0x00, 0x01, 0x00, 0x11, 0x2B, 0x00, 0x00, 0x22, 0x56,
+                        0x00, 0x00, 0x02, 0x00, 0x10, 0x00, 0x64, 0x61, 0x74, 0x61,
+                        0x14, 0x00, 0x00, 0x00,
+                };
+
+        intToBytes(raw.length+44-8, headerdata, 4);
+        intToBytes(raw.length, headerdata, 40);
+
+        byte[] ret = new byte[raw.length+headerdata.length];
+        System.arraycopy(headerdata, 0,ret , 0, headerdata.length);
+        System.arraycopy(raw, 0, ret, headerdata.length, raw.length);
+        return ret;
+    }
+
+    public byte[] toByteArray ()
+    {
+        byte[] res = new byte[data.length * 2];
+        for (int s = 0; s < data.length; s++)
+        {
+            res[s * 2+1] = (byte) ((short) data[s] >>> 8);
+            res[s * 2] = (byte) ((short) data[s] & 0xff);
+        }
+        return res;
     }
 
     //////////////////////////////////////////////////////////////////

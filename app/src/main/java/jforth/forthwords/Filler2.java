@@ -1,5 +1,8 @@
 package jforth.forthwords;
 
+import jforth.waves.Morse;
+import jforth.waves.Wave16;
+import jforth.waves.WaveForms;
 import tools.Base64;
 import jforth.*;
 
@@ -683,5 +686,110 @@ class Filler2
                             return 1;
                         }
                 ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "sinWav", false, "Make sinus wave",
+                        (dStack2, vStack2) -> executeSine(dStack2)
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "rectWav", false, "Make rectangle wave",
+                        (dStack2, vStack2) -> executeRect(dStack2)
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "sawWav", false, "Make sawrooth wave",
+                        (dStack2, vStack2) -> executeSaw(dStack2)
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "triWav", false, "Make triangle wave",
+                        (dStack1, vStack1) -> executeTri(dStack1)
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "morse", false, "Morse signal from string",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                String s1 = Utilities.readString(dStack);
+                                byte[] morse = Morse.text2Wave(s1);
+                                dStack.push(Morse.toAudioString(morse));
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "morseTxt", false, "translate to Morse alphabet",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                String s1 = Utilities.readString(dStack);
+                                dStack.push(Morse.text2Morse(s1));
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
     }
+
+    private static int executeSine (OStack dStack)
+    {
+        return genWave(dStack, WaveForms::curveSine);
+    }
+
+    private static int executeRect (OStack dStack)
+    {
+        return genWave(dStack, WaveForms::curveRect);
+    }
+
+    private static int executeSaw (OStack dStack)
+    {
+        return genWave(dStack, WaveForms::curveSawTooth);
+    }
+
+    private static int executeTri (OStack dStack)
+    {
+        return genWave(dStack, WaveForms::curveTriangle);
+    }
+
+    interface WaveGen
+    {
+        Wave16 gen (int rate, int len, double freq, int startval);
+    }
+
+    private static int genWave (OStack dStack, WaveGen wvg)
+    {
+        try
+        {
+            double freq = Utilities.readDouble(dStack); // Hz
+            int len = (int)Utilities.readLong(dStack);  // milliseconds
+            Wave16 wv = wvg.gen(11025,11*len,freq, 0);
+            dStack.push(wv.toString());
+            return 1;
+        }
+        catch (Exception unused)
+        {
+            return 0;
+        }
+    }
+
+
 }

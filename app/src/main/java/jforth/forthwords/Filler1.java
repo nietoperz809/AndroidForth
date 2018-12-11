@@ -1,9 +1,7 @@
 package jforth.forthwords;
 
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
 import jforth.*;
+import jforth.waves.WavePlayer;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.complex.Complex;
@@ -1989,15 +1987,7 @@ class Filler1
                             try
                             {
                                 short[] arr = Utilities.toShortArray(Utilities.readString(dStack));
-
-                                AudioTrack tr = new AudioTrack(AudioManager.STREAM_MUSIC,
-                                        SAMPLERATE,
-                                        AudioFormat.CHANNEL_OUT_MONO,
-                                        AudioFormat.ENCODING_PCM_16BIT,
-                                        arr.length,
-                                        AudioTrack.MODE_STREAM);
-                                tr.write (arr, 0, arr.length);
-                                tr.play();
+                                WavePlayer.play16PCM(arr, SAMPLERATE);
                                 return 1;
                             }
                             catch (Exception e)
@@ -2006,26 +1996,6 @@ class Filler1
                             }
                         }
                 ));
-
-//        _fw.add(new PrimitiveWord
-//                (
-//                        "playFile", false, "Play Wave audio file",
-//                        (dStack, vStack) ->
-//                        {
-//                            try
-//                            {
-//                                String o1 = Utilities.readString(dStack);
-//                                WavePlayer ae = new WavePlayer();
-//                                ae.loadFile(o1);
-//                                ae.start();
-//                                return 1;
-//                            }
-//                            catch (Exception e)
-//                            {
-//                                return 0;
-//                            }
-//                        }
-//                ));
 
         _fw.add(new PrimitiveWord
                 (
