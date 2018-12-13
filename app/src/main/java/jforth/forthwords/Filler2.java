@@ -1,10 +1,9 @@
 package jforth.forthwords;
 
-import jforth.waves.Morse;
-import jforth.waves.Wave16;
-import jforth.waves.WaveForms;
-import tools.Base64;
 import jforth.*;
+import jforth.waves.*;
+import org.apache.commons.math3.complex.Complex;
+import tools.Base64;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -14,12 +13,14 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.TimerTask;
 
+import static org.apache.commons.math3.complex.ComplexUtils.polar2Complex;
+
 //import javax.script.ScriptEngine;
 //import javax.script.ScriptEngineManager;
 
 class Filler2
 {
-    static void fill (WordsList _fw, PredefinedWords predefinedWords)
+    static void fill (WordsList _fw, PredefinedWords predefs)
     {
         _fw.add(new PrimitiveWord
                 (
@@ -315,13 +316,13 @@ class Filler2
                         "if", true,
                         (dStack, vStack) ->
                         {
-                            if (!predefinedWords._jforth.compiling)
+                            if (!predefs._jforth.compiling)
                             {
                                 return 1;
                             }
-                            int currentIndex = predefinedWords._jforth.wordBeingDefined.getNextWordIndex();
+                            int currentIndex = predefs._jforth.wordBeingDefined.getNextWordIndex();
                             IfControlWord ifcw = new IfControlWord(currentIndex);
-                            predefinedWords._jforth.wordBeingDefined.addWord(ifcw);
+                            predefs._jforth.wordBeingDefined.addWord(ifcw);
                             vStack.push(ifcw);
                             return 1;
                         }
@@ -332,12 +333,12 @@ class Filler2
                         "then", true,
                         (dStack, vStack) ->
                         {
-                            if (!predefinedWords._jforth.compiling)
+                            if (!predefs._jforth.compiling)
                             {
                                 return 1;
                             }
                             Object o = vStack.pop();
-                            int thenIndex = predefinedWords._jforth.wordBeingDefined.getNextWordIndex();
+                            int thenIndex = predefs._jforth.wordBeingDefined.getNextWordIndex();
                             if (o instanceof ElseControlWord)
                             {
                                 ((ElseControlWord) o).setThenIndexIncrement(thenIndex);
@@ -360,16 +361,16 @@ class Filler2
                         "else", true,
                         (dStack, vStack) ->
                         {
-                            if (!predefinedWords._jforth.compiling)
+                            if (!predefs._jforth.compiling)
                             {
                                 return 1;
                             }
                             Object o = vStack.peek();
                             if (o instanceof IfControlWord)
                             {
-                                int elseIndex = predefinedWords._jforth.wordBeingDefined.getNextWordIndex() + 1;
+                                int elseIndex = predefs._jforth.wordBeingDefined.getNextWordIndex() + 1;
                                 ElseControlWord ecw = new ElseControlWord(elseIndex);
-                                predefinedWords._jforth.wordBeingDefined.addWord(ecw);
+                                predefs._jforth.wordBeingDefined.addWord(ecw);
                                 vStack.push(ecw);
                                 ((IfControlWord) o).setElseIndex(elseIndex);
                             }
@@ -386,10 +387,10 @@ class Filler2
                         "do", true,
                         (dStack, vStack) ->
                         {
-                            predefinedWords.createTemporaryImmediateWord();
+                            predefs.createTemporaryImmediateWord();
                             DoLoopControlWord dlcw = new DoLoopControlWord();
-                            predefinedWords._jforth.wordBeingDefined.addWord(dlcw);
-                            int index = predefinedWords._jforth.wordBeingDefined.getNextWordIndex();
+                            predefs._jforth.wordBeingDefined.addWord(dlcw);
+                            int index = predefs._jforth.wordBeingDefined.getNextWordIndex();
                             vStack.push((long) index);
                             return 1;
                         }
@@ -426,12 +427,12 @@ class Filler2
                         "leave", true,
                         (dStack, vStack) ->
                         {
-                            if (!predefinedWords._jforth.compiling)
+                            if (!predefs._jforth.compiling)
                             {
                                 return 1;
                             }
                             LeaveLoopControlWord llcw = new LeaveLoopControlWord();
-                            predefinedWords._jforth.wordBeingDefined.addWord(llcw);
+                            predefs._jforth.wordBeingDefined.addWord(llcw);
                             return 1;
                         }
                 ));
@@ -440,14 +441,14 @@ class Filler2
                 (
                         "loop", true,  "repeat loop",
                         (dStack, vStack) ->
-                                WordHelpers.addLoopWord(vStack, predefinedWords, LoopControlWord.class)
+                                WordHelpers.addLoopWord(vStack, predefs, LoopControlWord.class)
                 ));
 
         _fw.add(new PrimitiveWord
                 (
                         "+loop", true, "adds value to loop counter i",
                         (dStack, vStack) ->
-                                WordHelpers.addLoopWord(vStack, predefinedWords, PlusLoopControlWord.class)
+                                WordHelpers.addLoopWord(vStack, predefs, PlusLoopControlWord.class)
                 ));
 
         _fw.add(new PrimitiveWord
@@ -455,8 +456,8 @@ class Filler2
                         "begin", true,
                         (dStack, vStack) ->
                         {
-                            predefinedWords.createTemporaryImmediateWord();
-                            int index = predefinedWords._jforth.wordBeingDefined.getNextWordIndex();
+                            predefs.createTemporaryImmediateWord();
+                            int index = predefs._jforth.wordBeingDefined.getNextWordIndex();
                             vStack.push((long) index);
                             return 1;
                         }
@@ -466,7 +467,7 @@ class Filler2
                 (
                         "until", true,
                         (dStack, vStack) ->
-                                WordHelpers.addLoopWord(vStack, predefinedWords, EndLoopControlWord.class)
+                                WordHelpers.addLoopWord(vStack, predefs, EndLoopControlWord.class)
                 ));
 
         _fw.add(new PrimitiveWord
@@ -476,13 +477,13 @@ class Filler2
                         {
                             try
                             {
-                                predefinedWords._jforth.wordBeingDefined.addWord(predefinedWords._wl.search("false"));
+                                predefs._jforth.wordBeingDefined.addWord(predefs._wl.search("false"));
                             }
                             catch (Exception e)
                             {
                                 return 0;
                             }
-                            return WordHelpers.addLoopWord(vStack, predefinedWords, EndLoopControlWord.class);
+                            return WordHelpers.addLoopWord(vStack, predefs, EndLoopControlWord.class);
                         }
                 ));
 
@@ -491,12 +492,12 @@ class Filler2
                         "break", true, "Breaks out of the forth word",
                         (dStack, vStack) ->
                         {
-                            if (!predefinedWords._jforth.compiling)
+                            if (!predefs._jforth.compiling)
                             {
                                 return 1;
                             }
                             BreakLoopControlWord ecw = new BreakLoopControlWord();
-                            predefinedWords._jforth.wordBeingDefined.addWord(ecw);
+                            predefs._jforth.wordBeingDefined.addWord(ecw);
                             return 1;
                         }
                 ));
@@ -670,7 +671,7 @@ class Filler2
                         "cls", false, "clear screen",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth._out.print("\u001b[2J");
+                            predefs._jforth._out.print("\u001b[2J");
                             return 1;
                         }
                 ));
@@ -701,7 +702,7 @@ class Filler2
 
         _fw.add(new PrimitiveWord
                 (
-                        "sawWav", false, "Make sawrooth wave",
+                        "sawWav", false, "Make sawtooth wave",
                         (dStack2, vStack2) -> executeSaw(dStack2)
                 ));
 
@@ -748,6 +749,82 @@ class Filler2
                         }
                 ));
 
+        _fw.add(new PrimitiveWord
+                (
+                        "DTMF", false, "create DTMF sound",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                String s1 = Utilities.readString(dStack);
+                                DTMF dt = new DTMF(11025, 1500);
+                                Wave16 wv = dt.dtmfFromString(s1);
+                                dStack.push(wv.toString());
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "tune", false, "create music",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                String s1 = Utilities.readString(dStack);
+                                Wave16 wv = MusicTones.makeToneString(11025, s1);
+                                dStack.push(wv.toString());
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "toComplex", false, "make Complex number from stack elements",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                double d1 = Utilities.readDouble(dStack);
+                                double d2 = Utilities.readDouble(dStack);
+                                dStack.push(new Complex (d2, d1));
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
+        _fw.add(new PrimitiveWord
+                (
+                        "polToC", false, "make Complex number polar values on stack",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                double d1 = Utilities.readDouble(dStack);
+                                double d2 = Utilities.readDouble(dStack);
+                                dStack.push(polar2Complex (d2, d1));
+                                return 1;
+                            }
+                            catch (Exception e)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
     }
 
     private static int executeSine (OStack dStack)
@@ -781,7 +858,7 @@ class Filler2
         {
             double freq = Utilities.readDouble(dStack); // Hz
             int len = (int)Utilities.readLong(dStack);  // milliseconds
-            Wave16 wv = wvg.gen(11025,11*len,freq, 0);
+            Wave16 wv = wvg.gen(JForth.SAMPLERATE,(JForth.SAMPLERATE*len)/1000,freq, 0);
             dStack.push(wv.toString());
             return 1;
         }

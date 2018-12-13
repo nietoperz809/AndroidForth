@@ -49,6 +49,23 @@ public class Wave16
         waveType = t;
     }
 
+    static public Wave16 combineAppend (Wave16... in)
+    {
+        int total = 0;
+        for (Wave16 anIn : in)
+        {
+            total = total + anIn.data.length;
+        }
+        Wave16 out = new Wave16(total, in[0].samplingRate);
+        int pos = 0;
+        for (Wave16 anIn : in)
+        {
+            System.arraycopy(anIn.data, 0, out.data, pos, anIn.data.length);
+            pos += anIn.data.length;
+        }
+        return out;
+    }
+
 //    public static Wave16 extractSamples(Wave16 source, int from, int to)
 //    {
 //        int len = to - from;

@@ -18,6 +18,7 @@ public class JForth
     public enum MODE {EDIT, DIRECT}
 
     public static final String ENCODING = "ISO_8859_1";
+    public static final int SAMPLERATE = 44100;
     public static final Long TRUE = 1L;
     public static final Long FALSE = 0L;
     // --Commented out by Inspection (3/25/2017 10:54 AM):private static final String ANSI_CLS = "\u001b[2J";

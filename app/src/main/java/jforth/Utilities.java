@@ -28,6 +28,15 @@ public class Utilities
 
     private static final char[] hexCode = "0123456789ABCDEF".toCharArray();
 
+    static short[] arrayGlue (short[] a1, short[] a2)
+    {
+        int len = a1.length+a2.length;
+        short[] res = new short[len];
+        System.arraycopy(a1, 0, res, 0, a1.length);
+        System.arraycopy(a2, 0, res, a1.length, a2.length);
+        return res;
+    }
+
     public static String printHexBinary(byte[] data)
     {
         StringBuilder r = new StringBuilder(data.length * 2);
@@ -483,6 +492,14 @@ public class Utilities
         Object o = dStack.pop();
         return getDouble(o);
     }
+
+//    public static boolean isNextElement (OStack stack, Class elem)
+//    {
+//        if (stack.isEmpty())
+//            return false;
+//        Object o = stack.peek();
+//        return o.getClass().equals(elem);
+//    }
 
     static public boolean canBeDouble (Object o1)
     {

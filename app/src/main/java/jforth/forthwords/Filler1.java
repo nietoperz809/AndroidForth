@@ -26,27 +26,12 @@ import java.util.Random;
 import static org.apache.commons.math3.special.Gamma.gamma;
 import static org.mathIT.numbers.Riemann.zeta;
 
-//import scala.math.BigInt;
 
 class Filler1
 {
     static private final Random random = new Random();
-    static private final int SAMPLERATE = 11000;
-    static private final int BUFFERSIZE = 11000 * 2;
 
-//    static private AudioTrack _track = null;
-//    static void startAudio()
-//    {
-//        if (_track == null)
-//        {
-//            _track = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLERATE, AudioFormat.CHANNEL_OUT_MONO,
-//                    AudioFormat.ENCODING_PCM_16BIT, BUFFERSIZE, AudioTrack.MODE_STREAM);
-//            _track.play();
-//        }
-//    }
-
-
-    static void fill (WordsList _fw, PredefinedWords predefinedWords)
+    static void fill (WordsList _fw, PredefinedWords predefs)
     {
         // do nothing. comments handled by tokenizer
         _fw.add(new PrimitiveWord   // dummy
@@ -67,11 +52,11 @@ class Filler1
                         "'", true, "Push word from dictionary onto stack",
                         (dStack, vStack) ->
                         {
-                            if (predefinedWords._jforth.compiling)
+                            if (predefs._jforth.compiling)
                             {
                                 return 1;
                             }
-                            String name = predefinedWords._jforth.getNextToken();
+                            String name = predefs._jforth.getNextToken();
                             if (name == null)
                             {
                                 return 0;
@@ -79,7 +64,7 @@ class Filler1
                             BaseWord bw = null;
                             try
                             {
-                                bw = predefinedWords._jforth.dictionary.search(name);
+                                bw = predefs._jforth.dictionary.search(name);
                             }
                             catch (Exception ignore)
                             {
@@ -993,7 +978,8 @@ class Filler1
                             if (o1 instanceof Complex)
                             {
                                 Complex d1 = (Complex) o1;
-                                dStack.push(Math.atan(d1.getImaginary() / d1.getReal()));
+                                dStack.push(d1.getArgument());
+                                //dStack.push(Math.atan(d1.getImaginary() / d1.getReal()));
                             }
                             else
                             {
@@ -1205,12 +1191,12 @@ class Filler1
                         (dStack, vStack) ->
                         {
                             Object o = dStack.pop();
-                            String outstr = predefinedWords._jforth.ObjectToString(o);
+                            String outstr = predefs._jforth.ObjectToString(o);
                             if (outstr == null)
                             {
                                 return 0;
                             }
-                            predefinedWords._jforth._out.print(outstr);
+                            predefs._jforth._out.print(outstr);
                             return 1;
                         }
                 ));
@@ -1222,7 +1208,7 @@ class Filler1
                         {
                             if (!dStack.unpop())
                             {
-                                predefinedWords._jforth._out.print("Nothing to do ...");
+                                predefs._jforth._out.print("Nothing to do ...");
                             }
                             return 1;
                         }
@@ -1233,7 +1219,7 @@ class Filler1
                         ".v", false, "Show whole variable stack",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth._out.print(predefinedWords._jforth.dictionary.variableList());
+                            predefs._jforth._out.print(predefs._jforth.dictionary.variableList());
                             return 1;
                         }
                 ));
@@ -1245,7 +1231,7 @@ class Filler1
                         {
                             for (Object o : dStack)
                             {
-                                predefinedWords._jforth._out.print(predefinedWords._jforth.ObjectToString(o) + " ");
+                                predefs._jforth._out.print(predefs._jforth.ObjectToString(o) + " ");
                             }
                             return 1;
                         }
@@ -1256,7 +1242,7 @@ class Filler1
                         "cr", false, "Emit carriage return",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth._out.println();
+                            predefs._jforth._out.println();
                             return 1;
                         }
                 ));
@@ -1266,7 +1252,7 @@ class Filler1
                         "sp", false, "Emit single space",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth._out.print(' ');
+                            predefs._jforth._out.print(' ');
                             return 1;
                         }
                 ));
@@ -1285,7 +1271,7 @@ class Filler1
                                 {
                                     sb.append(" ");
                                 }
-                                predefinedWords._jforth._out.print(sb.toString());
+                                predefs._jforth._out.print(sb.toString());
                                 return 1;
                             }
                             else
@@ -1300,7 +1286,7 @@ class Filler1
                         "bin", false, "Set number base to 2",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth.base = 2;
+                            predefs._jforth.base = 2;
                             return 1;
                         }
                 ));
@@ -1310,7 +1296,7 @@ class Filler1
                         "dec", false, "Set number base to 10",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth.base = 10;
+                            predefs._jforth.base = 10;
                             return 1;
                         }
                 ));
@@ -1320,7 +1306,7 @@ class Filler1
                         "hex", false, "Set number base to 16",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth.base = 16;
+                            predefs._jforth.base = 16;
                             return 1;
                         }
                 ));
@@ -1337,7 +1323,7 @@ class Filler1
                                 {
                                     return 0;
                                 }
-                                predefinedWords._jforth.base = l.intValue();
+                                predefs._jforth.base = l.intValue();
                                 return 1;
                             }
                             catch (Exception e)
@@ -1354,7 +1340,7 @@ class Filler1
                         {
                             try
                             {
-                                return predefinedWords._jforth.currentWord.execute(dStack, vStack);
+                                return predefs._jforth.currentWord.execute(dStack, vStack);
                             }
                             catch (Exception e)
                             {
@@ -1370,8 +1356,8 @@ class Filler1
                         {
                             try
                             {
-                                predefinedWords._jforth.currentWord =
-                                        predefinedWords._jforth.wordBeingDefined;
+                                predefs._jforth.currentWord =
+                                        predefs._jforth.wordBeingDefined;
                                 return 1;
                             }
                             catch (Exception e)
@@ -1386,13 +1372,13 @@ class Filler1
                         ":", false, "Begin word definition",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth.compiling = true;
-                            String name = predefinedWords._jforth.getNextToken();
+                            predefs._jforth.compiling = true;
+                            String name = predefs._jforth.getNextToken();
                             if (name == null)
                             {
                                 return 0;
                             }
-                            predefinedWords._jforth.wordBeingDefined = new NonPrimitiveWord(name);
+                            predefs._jforth.wordBeingDefined = new NonPrimitiveWord(name);
                             return 1;
                         }
                 ));
@@ -1402,9 +1388,9 @@ class Filler1
                         ";", true, "End word definition",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth.compiling = false;
-                            predefinedWords._jforth.dictionary.add(predefinedWords._jforth.wordBeingDefined);
-                            predefinedWords._jforth.wordBeingDefined = null;
+                            predefs._jforth.compiling = false;
+                            predefs._jforth.dictionary.add(predefs._jforth.wordBeingDefined);
+                            predefs._jforth.wordBeingDefined = null;
                             return 1;
                         }
                 ));
@@ -1415,7 +1401,7 @@ class Filler1
                         (dStack, vStack) ->
                         {
                             String c = Utilities.readStringOrNull(dStack);
-                            dStack.push(predefinedWords._jforth.dictionary.toString(false, c));
+                            dStack.push(predefs._jforth.dictionary.toString(false, c));
                             return 1;
                         }
                 ));
@@ -1426,7 +1412,7 @@ class Filler1
                         (dStack, vStack) ->
                         {
                             String c = Utilities.readStringOrNull(dStack);
-                            dStack.push(predefinedWords._jforth.dictionary.toString(true, c));
+                            dStack.push(predefs._jforth.dictionary.toString(true, c));
                             return 1;
                         }
                 ));
@@ -1436,7 +1422,7 @@ class Filler1
                         "forget", true, "Delete word from dictionary",
                         (dStack, vStack) ->
                         {
-                            String name = predefinedWords._jforth.getNextToken();
+                            String name = predefs._jforth.getNextToken();
                             if (name == null)
                             {
                                 return 0;
@@ -1444,7 +1430,7 @@ class Filler1
                             BaseWord bw;
                             try
                             {
-                                bw = predefinedWords._jforth.dictionary.search(name);
+                                bw = predefs._jforth.dictionary.search(name);
                             }
                             catch (Exception ignore)
                             {
@@ -1455,7 +1441,7 @@ class Filler1
                                 if (!bw.isPrimitive)
                                 {
                                     //dictionary.truncateList(bw);
-                                    predefinedWords._jforth.dictionary.remove(bw);
+                                    predefs._jforth.dictionary.remove(bw);
                                     return 1;
                                 }
                             }
@@ -1472,13 +1458,13 @@ class Filler1
                             {
                                 return 0;
                             }
-                            String name = predefinedWords._jforth.getNextToken();
+                            String name = predefs._jforth.getNextToken();
                             if (name == null)
                             {
                                 return 0;
                             }
                             NonPrimitiveWord constant = new NonPrimitiveWord(name);
-                            predefinedWords._jforth.dictionary.add(constant);
+                            predefs._jforth.dictionary.add(constant);
                             Object o1 = dStack.pop();
                             BaseWord bw = WordHelpers.toLiteral(o1);
 //                            if (bw == null)
@@ -1495,13 +1481,13 @@ class Filler1
                         "variable", true, "Create new variable",
                         (dStack, vStack) ->
                         {
-                            String name = predefinedWords._jforth.getNextToken();
+                            String name = predefs._jforth.getNextToken();
                             if (name == null)
                             {
                                 return 0;
                             }
                             StorageWord sw = new StorageWord(name, 1, false);
-                            predefinedWords._jforth.dictionary.add(sw);
+                            predefs._jforth.dictionary.add(sw);
                             return 1;
                         }
                 ));
@@ -1665,13 +1651,13 @@ class Filler1
                                 return 0;
                             }
                             int size = (int) ((Long) o).longValue();
-                            String name = predefinedWords._jforth.getNextToken();
+                            String name = predefs._jforth.getNextToken();
                             if (name == null)
                             {
                                 return 0;
                             }
                             StorageWord sw = new StorageWord(name, size, true);
-                            predefinedWords._jforth.dictionary.add(sw);
+                            predefs._jforth.dictionary.add(sw);
                             return 1;
                         }
                 ));
@@ -1759,8 +1745,8 @@ class Filler1
                             if (o1 instanceof Long)
                             {
                                 Long l = (Long) o1;
-                                predefinedWords._jforth._out.print((char) (long) l);
-                                predefinedWords._jforth._out.flush();
+                                predefs._jforth._out.print((char) (long) l);
+                                predefs._jforth._out.flush();
                                 return 1;
                             }
                             if (o1 instanceof String)
@@ -1768,7 +1754,7 @@ class Filler1
                                 String str = (String) o1;
                                 for (int s = 0; s < str.length(); s++)
                                 {
-                                    predefinedWords._jforth._out.print(str.charAt(s));
+                                    predefs._jforth._out.print(str.charAt(s));
                                 }
                                 return 1;
                             }
@@ -1987,7 +1973,7 @@ class Filler1
                             try
                             {
                                 short[] arr = Utilities.toShortArray(Utilities.readString(dStack));
-                                WavePlayer.play16PCM(arr, SAMPLERATE);
+                                WavePlayer.play16PCM(arr, predefs._jforth.SAMPLERATE);
                                 return 1;
                             }
                             catch (Exception e)
@@ -2005,7 +1991,15 @@ class Filler1
                             try
                             {
                                 double o1 = Utilities.readDouble(dStack);
-                                dStack.push(new Fraction(o1));
+                                try
+                                {
+                                    long l1 = Utilities.readLong(dStack);
+                                    dStack.push(new Fraction((int)l1, (int)o1));
+                                }
+                                catch (Exception e)
+                                {
+                                    dStack.push(new Fraction(o1));
+                                }
                                 return 1;
                             }
                             catch (Exception e)
@@ -2444,7 +2438,7 @@ class Filler1
                             Object o1 = dStack.pop();
                             if (o1 instanceof Long)
                             {
-                                dStack.push(Long.toString((Long) o1, predefinedWords._jforth.base).toUpperCase());
+                                dStack.push(Long.toString((Long) o1, predefs._jforth.base).toUpperCase());
                             }
                             else if (o1 instanceof Double)
                             {
@@ -2494,7 +2488,7 @@ class Filler1
                             }
                             else
                             {
-                                String s = predefinedWords._jforth.makePrintable(o1);
+                                String s = predefs._jforth.makePrintable(o1);
                                 dStack.push (s.length());
                             }
                             return 1;
@@ -3029,7 +3023,7 @@ class Filler1
                             try
                             {
                                 String fileName = Utilities.readString(dStack);
-                                predefinedWords._jforth.executeFile(fileName);
+                                predefs._jforth.executeFile(fileName);
                                 return 1;
                             }
                             catch (Exception e)
@@ -3046,7 +3040,7 @@ class Filler1
                         {
                             try
                             {
-                                predefinedWords._jforth.history.save();
+                                predefs._jforth.history.save();
                             }
                             catch (Exception ex)
                             {
@@ -3063,7 +3057,7 @@ class Filler1
                         {
                             try
                             {
-                                predefinedWords._jforth.history.load();
+                                predefs._jforth.history.load();
                             }
                             catch (Exception ex)
                             {
@@ -3078,7 +3072,7 @@ class Filler1
                         PredefinedWords.PLAYHIST, false, "Execute History",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth.play();
+                            predefs._jforth.play();
                             return 1;
                         }
                 ));
@@ -3088,7 +3082,7 @@ class Filler1
                         "clearHist", false, "Clear History",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth.history.clear();
+                            predefs._jforth.history.clear();
                             return 1;
                         }
                 ));
@@ -3098,8 +3092,8 @@ class Filler1
                         "editor", false, "Enter line editor",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth._out.println("Type #h for help ...");
-                            predefinedWords._jforth.mode = JForth.MODE.EDIT;
+                            predefs._jforth._out.println("Type #h for help ...");
+                            predefs._jforth.mode = JForth.MODE.EDIT;
                             return 1;
                         }
                 ));
@@ -3109,8 +3103,8 @@ class Filler1
                         "run", false, "Runs program in editor",
                         (dStack, vStack) ->
                         {
-                            String s = predefinedWords._jforth._lineEditor.toString();
-                            predefinedWords._jforth.interpretLine(s);
+                            String s = predefs._jforth._lineEditor.toString();
+                            predefs._jforth.interpretLine(s);
                             return 1;
                         }
                 ));
@@ -3120,7 +3114,7 @@ class Filler1
                         "list", false, "Put program in editor on stack",
                         (dStack, vStack) ->
                         {
-                            dStack.push(predefinedWords._jforth._lineEditor.toString());
+                            dStack.push(predefs._jforth._lineEditor.toString());
                             return 1;
                         }
                 ));
@@ -3644,8 +3638,8 @@ class Filler1
                         "bye", false, "End the Forth interpreter",
                         (dStack, vStack) ->
                         {
-                            predefinedWords._jforth._out.println("JForth will close now!");
-                            predefinedWords._jforth._out.flush();
+                            predefs._jforth._out.println("JForth will close now!");
+                            predefs._jforth._out.flush();
                             Utilities.terminateSoon(1000);
                             return 1;
                         }

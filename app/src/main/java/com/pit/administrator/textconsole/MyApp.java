@@ -3,7 +3,10 @@ package com.pit.administrator.textconsole;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.view.Window;
+import android.view.WindowManager;
 
 public class MyApp extends Application
 {
@@ -74,24 +77,16 @@ public class MyApp extends Application
     }
 
 
-//    /**
-//     * Returns hosting Activity
-//     * @param v The view that is hosted
-//     * @return an Activity or null
-//     */
-//    public static Activity getActivity (View v)
-//    {
-//        Context context =  v.getContext();
-//        while (context instanceof ContextWrapper)
-//        {
-//            if (context instanceof Activity)
-//            {
-//                return (Activity) context;
-//            }
-//            context = ((ContextWrapper) context).getBaseContext();
-//        }
-//        return null;
-//    }
+    /**
+     * Sets this App to Fullscreen Landscape
+     * This Class MUST be derived from Activity or it will CRASH!
+     */
+    static void setFullScreenPortrait(Activity act)
+    {
+        act.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        act.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
 
     private Activity currentActivity;
 

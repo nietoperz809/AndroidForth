@@ -524,23 +524,23 @@ public class TestCases
         Assert.assertEquals("1FFE"+EP, s);
     }
 
-    @Test
-    public void TestEval()
-    {
-        String s = check ("\"text='';for(i=0;i<10;i++)text+=3*i+'-';\" js",
-                ".");
-        System.out.println(s);
-        Assert.assertEquals("0-3-6-9-12-15-18-21-24-27-"+EP, s);
-    }
+//    @Test
+//    public void TestEval()
+//    {
+//        String s = check ("\"text='';for(i=0;i<10;i++)text+=3*i+'-';\" js",
+//                ".");
+//        System.out.println(s);
+//        Assert.assertEquals("0-3-6-9-12-15-18-21-24-27-"+EP, s);
+//    }
 
-    @Test
-    public void TestEval2()
-    {
-        String s = check ("\"str='Visit_W3Schools';n=str.search(/w3schools/i);\" js",
-                ".");
-        System.out.println(s);
-        Assert.assertEquals("6"+EP, s);
-    }
+//    @Test
+//    public void TestEval2()
+//    {
+//        String s = check ("\"str='Visit_W3Schools';n=str.search(/w3schools/i);\" js",
+//                ".");
+//        System.out.println(s);
+//        Assert.assertEquals("6"+EP, s);
+//    }
 
     @Test
     public void TestRWFile()
@@ -668,16 +668,16 @@ public class TestCases
         Assert.assertEquals("33"+EP, s);
     }
 
-    @Test
-    public void TestJava()
-    {
-        final String source =
-                "\"public static double main(double arg) {return func(arg);}" +
-                        "public static double func(double arg) {return Math.sqrt(arg);}"+
-                        "\"";
-        String s = check ("56.25 "+source + " java",".");
-        Assert.assertEquals("7.5"+EP, s);
-    }
+//    @Test
+//    public void TestJava()
+//    {
+//        final String source =
+//                "\"public static double main(double arg) {return func(arg);}" +
+//                        "public static double func(double arg) {return Math.sqrt(arg);}"+
+//                        "\"";
+//        String s = check ("56.25 "+source + " java",".");
+//        Assert.assertEquals("7.5"+EP, s);
+//    }
 
     @Test
     public void TestDotQuote()
@@ -755,5 +755,27 @@ public class TestCases
         Assert.assertEquals("720"+EP, s);
     }
 
+    @Test
+    public void TestFrac2()
+    {
+        String s = check ("15 toFraction",".");
+        Assert.assertEquals("15/1"+EP, s);
+        s = check ("3 4 toFraction",".");
+        Assert.assertEquals("3/4"+EP, s);
+    }
+
+    @Test
+    public void TestReadComplex()
+    {
+        String s = check ("5 6 toComplex",".");
+        Assert.assertEquals("5.0+6.0i"+EP, s);
+    }
+
+    @Test
+    public void TestPol2Complex()
+    {
+        String s = check ("5 3 polToC phi",".");
+        Assert.assertEquals("3"+EP, s);
+    }
 
 }
