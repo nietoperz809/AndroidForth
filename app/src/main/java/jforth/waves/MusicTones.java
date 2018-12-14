@@ -4,7 +4,10 @@ import java.util.ArrayList;
 
 public class MusicTones
 {
-    private static final float[][] tones = new float[][]
+    /**
+     * Array of frequencies
+     */
+    private static final float[][] frequencies = new float[][]
             {
                     {16.35f, 17.32f, 18.35f, 19.45f, 20.60f, 21.83f, 23.12f, 24.50f, 25.96f, 27.50f, 29.14f, 30.87f},
                     {32.70f, 34.65f, 36.71f, 38.89f, 41.20f, 43.65f, 46.25f, 49.00f, 51.91f, 55.00f, 58.27f, 61.74f},
@@ -17,9 +20,14 @@ public class MusicTones
                     {4186.0f, 4435.0f, 4699.0f, 4978.0f, 5274.0f, 5588.0f, 5920.0f, 6272.0f, 6645.0f, 7040.0f, 7459.0f, 7902.0f},
             };
 
+    /**
+     * Musical notes
+     */
     private static final String[] notes = {"C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"};
 
-    public static float getTone (String note, int octave) throws Exception
+    private static int multiplier = 1;  // Tone length
+
+    public static float getFrequency (String note, int octave) throws Exception
     {
         int x = -1;
         for (int s=0; s<=notes.length; s++)
@@ -30,7 +38,7 @@ public class MusicTones
                 break;
             }
         }
-        return tones[octave][x];
+        return frequencies[octave][x];
     }
 
     public static Wave16 makeTone (int samplerate, String code, int length) throws Exception
@@ -38,14 +46,14 @@ public class MusicTones
         float freq;
         if (code.length()==2)
         {
-            freq = getTone (code.substring(0, 1), code.charAt(1)-'0');
+            freq = getFrequency(code.substring(0, 1), code.charAt(1)-'0');
         }
         else // length == 3
         {
-            freq = getTone (code.substring(0, 2), code.charAt(2)-'0');
+            freq = getFrequency(code.substring(0, 2), code.charAt(2)-'0');
         }
         return WaveForms.curveSine(samplerate,
-                samplerate*length/1000, freq, 0);
+                samplerate*length/1000*multiplier, freq, 0);
     }
 
     public static Wave16 makeTone (int samplerate, String code) throws Exception
@@ -53,7 +61,7 @@ public class MusicTones
         return makeTone(samplerate, code, 500);
     }
 
-    public static Wave16 makeToneString (int samplerate, String input) throws Exception
+    public static Wave16 makeSong (int samplerate, String input) throws Exception
     {
         ArrayList<String> list = parseTones (input);
         Wave16[] wv = new Wave16[list.size()];
@@ -64,6 +72,11 @@ public class MusicTones
         return Wave16.combineAppend(wv);
     }
 
+    /**
+     * Find Notes in string, also length code 'L'
+     * @param in input string
+     * @return List of found notes
+     */
     public static ArrayList<String> parseTones (String in)
     {
         in = in.toUpperCase();
@@ -75,7 +88,7 @@ public class MusicTones
             char c = in.charAt(s);
             if (sb.length() == 0)  // 1st char
             {
-                if (c == 'C' || c == 'D' || c == 'E' || c == 'F' || c == 'G' || c == 'A' || c == 'B')
+                if (c == 'L' || c == 'C' || c == 'D' || c == 'E' || c == 'F' || c == 'G' || c == 'A' || c == 'B')
                 {
                     found = true;
                     sb.append(c);
@@ -84,7 +97,15 @@ public class MusicTones
             else if (sb.length() == 1) // 2nd char
             {
                 char c2 = sb.charAt(0);
-                if (c == '#' && (c2 == 'C' || c2 =='G' || c2 =='F'))
+                if (c2 =='L')
+                {
+                    int oct = c-'0';
+                    if (oct >=1 && oct <= 9)
+                    {
+                        multiplier = oct;
+                    }
+                }
+                else if (c == '#' && (c2 == 'C' || c2 =='G' || c2 =='F'))
                 {
                     found = true;
                     sb.append('#');
@@ -111,4 +132,5 @@ public class MusicTones
         return toks;
     }
 
-}
+} // End class
+

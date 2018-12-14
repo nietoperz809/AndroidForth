@@ -777,7 +777,7 @@ class Filler2
                             try
                             {
                                 String s1 = Utilities.readString(dStack);
-                                Wave16 wv = MusicTones.makeToneString(11025, s1);
+                                Wave16 wv = MusicTones.makeSong(11025, s1);
                                 dStack.push(wv.toString());
                                 return 1;
                             }
