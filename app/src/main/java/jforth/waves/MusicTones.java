@@ -103,6 +103,7 @@ public class MusicTones
                     if (oct >=1 && oct <= 9)
                     {
                         multiplier = oct;
+                        continue;   // don't put L's in the list
                     }
                 }
                 else if (c == '#' && (c2 == 'C' || c2 =='G' || c2 =='F'))
