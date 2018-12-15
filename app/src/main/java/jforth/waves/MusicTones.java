@@ -25,9 +25,9 @@ public class MusicTones
      */
     private static final String[] notes = {"C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"};
 
-    private static int multiplier = 1;  // Tone length
+    private int multiplier;  // Tone length
 
-    public static float getFrequency (String note, int octave) throws Exception
+    private float getFrequency (String note, int octave) throws Exception
     {
         int x = -1;
         for (int s=0; s<=notes.length; s++)
@@ -41,9 +41,14 @@ public class MusicTones
         return frequencies[octave][x];
     }
 
-    public static Wave16 makeTone (int samplerate, String code, int length) throws Exception
+    private Wave16 makeTone (int samplerate, String code, int length) throws Exception
     {
         float freq;
+        if (code.charAt(0) == 'L')
+        {
+            multiplier = code.charAt(1)-'0';
+            return null;
+        }
         if (code.length()==2)
         {
             freq = getFrequency(code.substring(0, 1), code.charAt(1)-'0');
@@ -56,20 +61,35 @@ public class MusicTones
                 samplerate*length/1000*multiplier, freq, 0);
     }
 
-    public static Wave16 makeTone (int samplerate, String code) throws Exception
+    private Wave16 makeTone (int samplerate, String code) throws Exception
     {
         return makeTone(samplerate, code, 500);
     }
 
-    public static Wave16 makeSong (int samplerate, String input) throws Exception
+    public Wave16 makeSong (int samplerate, String input) throws Exception
     {
+        multiplier = 1;
         ArrayList<String> list = parseTones (input);
-        Wave16[] wv = new Wave16[list.size()];
-        for (int s=0; s<wv.length; s++)
+        Wave16[] wv = new Wave16[sizeWithoutLs(list)];
+        int counter=0;
+        for (int s=0; s<list.size(); s++)
         {
-            wv[s] = makeTone(samplerate, list.get(s));
+            Wave16 w2 = makeTone(samplerate, list.get(s));
+            if (w2 != null)
+                wv[counter++] = w2;
         }
         return Wave16.combineAppend(wv);
+    }
+
+    private int sizeWithoutLs (ArrayList<String> in)
+    {
+        int ret=0;
+        for (String s : in)
+        {
+            if (s.charAt(0) != 'L')
+                ret++;
+        }
+        return ret;
     }
 
     /**
@@ -77,7 +97,7 @@ public class MusicTones
      * @param in input string
      * @return List of found notes
      */
-    public static ArrayList<String> parseTones (String in)
+    private ArrayList<String> parseTones (String in)
     {
         in = in.toUpperCase();
         ArrayList<String> toks = new ArrayList<>();
@@ -99,11 +119,12 @@ public class MusicTones
                 char c2 = sb.charAt(0);
                 if (c2 =='L')
                 {
-                    int oct = c-'0';
-                    if (oct >=1 && oct <= 9)
+                    if (c >='1' && c <= '9')
                     {
-                        multiplier = oct;
-                        continue;   // don't put L's in the list
+                        sb.append(c);
+                        toks.add(sb.toString());
+                        sb.setLength(0);
+                        continue;
                     }
                 }
                 else if (c == '#' && (c2 == 'C' || c2 =='G' || c2 =='F'))
