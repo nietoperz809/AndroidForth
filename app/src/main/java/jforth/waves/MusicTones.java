@@ -25,9 +25,12 @@ public class MusicTones
      */
     private static final String[] notes = {"C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"};
 
+    /**
+     * Tone length
+     */
     private int multiplier;  // Tone length
 
-    private float getFrequency (String note, int octave) throws Exception
+    private float getFrequency (String note, int octave) throws ArrayIndexOutOfBoundsException
     {
         int x = -1;
         for (int s=0; s<=notes.length; s++)
@@ -41,7 +44,7 @@ public class MusicTones
         return frequencies[octave][x];
     }
 
-    private Wave16 makeTone (int samplerate, String code, int length) throws Exception
+    private Wave16 makeTone (int samplerate, String code)
     {
         float freq;
         if (code.charAt(0) == 'L')
@@ -58,15 +61,16 @@ public class MusicTones
             freq = getFrequency(code.substring(0, 2), code.charAt(2)-'0');
         }
         return WaveForms.curveSine(samplerate,
-                samplerate*length/1000*multiplier, freq, 0);
+                samplerate*multiplier/2, freq, 0);
     }
 
-    private Wave16 makeTone (int samplerate, String code) throws Exception
-    {
-        return makeTone(samplerate, code, 500);
-    }
-
-    public Wave16 makeSong (int samplerate, String input) throws Exception
+    /**
+     * Make song from string
+     * @param samplerate sample rate
+     * @param input Input String  (eg. c4d4l3c4d4)
+     * @return complete wave sound
+     */
+    public Wave16 makeSong (int samplerate, String input)
     {
         multiplier = 1;
         ArrayList<String> list = parseTones (input);
@@ -101,7 +105,7 @@ public class MusicTones
     {
         in = in.toUpperCase();
         ArrayList<String> toks = new ArrayList<>();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int s=0; s<in.length(); s++)
         {
             boolean found = false;
@@ -117,7 +121,7 @@ public class MusicTones
             else if (sb.length() == 1) // 2nd char
             {
                 char c2 = sb.charAt(0);
-                if (c2 =='L')
+                if (c2 =='L')   // first is 'L'
                 {
                     if (c >='1' && c <= '9')
                     {
