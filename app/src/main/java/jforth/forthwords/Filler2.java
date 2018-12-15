@@ -720,7 +720,8 @@ class Filler2
                             try
                             {
                                 String s1 = Utilities.readString(dStack);
-                                byte[] morse = Morse.text2Wave(s1);
+                                Morse m = new Morse();
+                                byte[] morse = m.text2Wave(s1);
                                 dStack.push(Morse.toAudioString(morse));
                                 return 1;
                             }
@@ -757,7 +758,7 @@ class Filler2
                             try
                             {
                                 String s1 = Utilities.readString(dStack);
-                                DTMF dt = new DTMF(11025, 1500);
+                                DTMF dt = new DTMF(44100, 1500*4);
                                 Wave16 wv = dt.dtmfFromString(s1);
                                 dStack.push(wv.toString());
                                 return 1;
@@ -787,7 +788,7 @@ class Filler2
                                 return 0;
                             }
                         }
-                ));
+                    ));
 
         _fw.add(new PrimitiveWord
                 (

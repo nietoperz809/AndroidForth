@@ -1,10 +1,12 @@
 package jforth.waves;
 
+import jforth.JForth;
+
 import java.util.HashMap;
 
 public class Morse
 {
-    static private HashMap<Character, String> dict = new HashMap<>();
+    static private final HashMap<Character, String> dict = new HashMap<>();
 
     static
     {
@@ -55,10 +57,19 @@ public class Morse
         //dict.put((char)0xffff, "........");    // Error
     }
 
-    private static Wave16 dot = WaveForms.curveSine(11025, 1500, 1000,0);
-    private static Wave16 dash = WaveForms.curveSine(11025, 3000, 1000,0);
-    private static Wave16 pause = WaveForms.curveSine(11025, 5000, 0,0);
-    private static Wave16 delay = WaveForms.curveSine(11025, 1000, 0,0);
+    private final Wave16 dot;
+    private final Wave16 dash;
+    private final Wave16 pause;
+    private final Wave16 delay;
+
+    public Morse ()
+    {
+        dot = WaveForms.curveSine(JForth.SAMPLERATE, 1500*4, 1000,0);
+        dash = WaveForms.curveSine(JForth.SAMPLERATE, 3000*4, 1000,0);
+        pause = WaveForms.curveSine(JForth.SAMPLERATE, 5000*4, 0,0);
+        delay = WaveForms.curveSine(JForth.SAMPLERATE, 1000*4, 0,0);
+    }
+
 
     /**
      * Converts text into morse representation
@@ -83,7 +94,7 @@ public class Morse
      * @param morse morse string
      * @return raw sound data, 11025 samples/sec PCM-16 signed, 1 channel
      */
-    public static byte[] morse2Audio (String morse)
+    private byte[] morse2Audio (String morse)
     {
         int totallen = 0;
         for(int s=0; s<morse.length(); s++)
@@ -136,7 +147,7 @@ public class Morse
      * @param in normal text
      * @return audio data (see morse2Audio)
      */
-    public static byte[] text2Wave (String in)
+    public byte[] text2Wave (String in)
     {
         String morse = text2Morse(in);
         return morse2Audio(morse);
@@ -149,5 +160,4 @@ public class Morse
             chars2[i] = (char) ((morse[i*2+1] << 8) + (morse[i*2] & 0xFF));
         return new String(chars2);
     }
-
 }

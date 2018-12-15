@@ -67,7 +67,7 @@ public class MusicTones
     /**
      * Make song from string
      * @param samplerate sample rate
-     * @param input Input String  (eg. c4d4l3c4d4)
+     * @param input Input String  (eg. c4d4l3c4d4 means play c4,d4 set length=3, then c4d4 again)
      * @return complete wave sound
      */
     public Wave16 makeSong (int samplerate, String input)
@@ -76,11 +76,13 @@ public class MusicTones
         ArrayList<String> list = parseTones (input);
         Wave16[] wv = new Wave16[sizeWithoutLs(list)];
         int counter=0;
-        for (int s=0; s<list.size(); s++)
+        for (String s1 : list)
         {
-            Wave16 w2 = makeTone(samplerate, list.get(s));
+            Wave16 w2 = makeTone(samplerate, s1);
             if (w2 != null)
+            {
                 wv[counter++] = w2;
+            }
         }
         return Wave16.combineAppend(wv);
     }
