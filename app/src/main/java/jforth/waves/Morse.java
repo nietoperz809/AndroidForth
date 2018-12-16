@@ -1,7 +1,5 @@
 package jforth.waves;
 
-import jforth.JForth;
-
 import java.util.HashMap;
 
 public class Morse
@@ -62,12 +60,12 @@ public class Morse
     private final Wave16 pause;
     private final Wave16 delay;
 
-    public Morse ()
+    public Morse (int samplerate)
     {
-        dot = WaveForms.curveSine(JForth.SAMPLERATE, 1500*4, 1000,0);
-        dash = WaveForms.curveSine(JForth.SAMPLERATE, 3000*4, 1000,0);
-        pause = WaveForms.curveSine(JForth.SAMPLERATE, 5000*4, 0,0);
-        delay = WaveForms.curveSine(JForth.SAMPLERATE, 1000*4, 0,0);
+        dot = WaveForms.curveSine(samplerate, 1500*4, 1000,0);
+        dash = WaveForms.curveSine(samplerate, 3000*4, 1000,0);
+        pause = WaveForms.curveSine(samplerate, 5000*4, 0,0);
+        delay = WaveForms.curveSine(samplerate, 1000*4, 0,0);
     }
 
 

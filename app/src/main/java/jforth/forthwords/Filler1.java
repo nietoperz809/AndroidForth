@@ -1,6 +1,8 @@
 package jforth.forthwords;
 
+import com.pit.administrator.textconsole.MyApp;
 import jforth.*;
+import jforth.waves.Wave16;
 import jforth.waves.WavePlayer;
 import org.apache.commons.math3.analysis.integration.SimpsonIntegrator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
@@ -1972,12 +1974,15 @@ class Filler1
                         {
                             try
                             {
-                                short[] arr = Utilities.toShortArray(Utilities.readString(dStack));
-                                WavePlayer.play16PCM(arr, predefs._jforth.SAMPLERATE);
+                                String s = (String)dStack.pop();
+                                byte[] wav = Wave16.makeHeader(Utilities.toRawByteArrayLE(s),
+                                        JForth.SAMPLERATE);
+                                WavePlayer.play(wav);
                                 return 1;
                             }
                             catch (Exception e)
                             {
+                                MyApp.showException(e);
                                 return 0;
                             }
                         }

@@ -1,47 +1,30 @@
 package jforth.waves;
 
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
+import android.media.MediaPlayer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 public class WavePlayer
 {
-    public static void play16PCM (short[] arr, int samplerate)
+    /**
+     * Play Wave file
+     * @param arr byte arry including header
+     //* @throws Exception if smth went wrong
+     */
+    public static void play (byte[] arr) throws Exception
     {
-        AudioTrack tr = new AudioTrack(AudioManager.STREAM_MUSIC,
-                samplerate,
-                AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                arr.length*2,
-                AudioTrack.MODE_STREAM);
+        File tempMp3 = File.createTempFile("audio", "wav");
+        tempMp3.deleteOnExit();
+        FileOutputStream fos = new FileOutputStream(tempMp3);
+        fos.write(arr);
+        fos.close();
 
-        final Thread t = Thread.currentThread();
-
-        tr.setNotificationMarkerPosition(arr.length - 1);  // Set the marker to the end.
-        tr.setPlaybackPositionUpdateListener(
-                new AudioTrack.OnPlaybackPositionUpdateListener()
-                {
-                    @Override
-                    public void onPeriodicNotification(AudioTrack track) {}
-
-                    @Override
-                    public void onMarkerReached(AudioTrack track)
-                    {
-                        t.interrupt();
-                    }
-                });
-        tr.write (arr, 0, arr.length);
-        tr.play();
-        if (arr.length > 1000)
-        {
-            try
-            {
-                Thread.sleep(100000);
-            }
-            catch (InterruptedException unused)
-            {
-                //e.printStackTrace();
-            }
-        }
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        FileInputStream fis = new FileInputStream(tempMp3);
+        mediaPlayer.setDataSource(fis.getFD());
+        mediaPlayer.prepare();
+        mediaPlayer.start();
     }
 }

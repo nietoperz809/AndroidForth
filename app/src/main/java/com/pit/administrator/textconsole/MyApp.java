@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class MyApp extends Application
 {
@@ -86,6 +87,12 @@ public class MyApp extends Application
         act.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         act.requestWindowFeature(Window.FEATURE_NO_TITLE);
         act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    public static void showException (Exception e)
+    {
+        Toast.makeText(instance.getBaseContext(),e.toString(),
+                Toast.LENGTH_LONG).show();
     }
 
     private Activity currentActivity;

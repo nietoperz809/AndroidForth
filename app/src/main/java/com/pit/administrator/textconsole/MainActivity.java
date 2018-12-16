@@ -1,8 +1,12 @@
 package com.pit.administrator.textconsole;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
+import android.text.method.ScrollingMovementMethod;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,6 +14,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import java.io.*;
 
 import static com.pit.administrator.textconsole.R.id.scrollView;
 import static com.pit.administrator.textconsole.R.id.textView;
@@ -80,20 +86,78 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void saveFile (String filename, String content)
+    {
+        FileOutputStream outputStream;
+        try
+        {
+            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(content.getBytes());
+            outputStream.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private String readFile (String filename)
+    {
+        FileInputStream inputStream;
+        try
+        {
+            inputStream = openFileInput(filename);
+            byte[] buff = new byte[256];
+            int res = inputStream.read(buff);
+            inputStream.close();
+            return new String(buff).substring(0,res);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    private void codeSlot (MenuItem item)
+    {
+        final String title = String.valueOf(item.getTitle());
+        String content = readFile(title);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        // Set up the input
+        final EditText input = new EditText(this);
+        input.setText(content);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        input.setLines(5);
+        input.setMaxLines(10);
+        input.setVerticalScrollBarEnabled(true);
+        input.setMovementMethod(ScrollingMovementMethod.getInstance());
+        input.setScrollBarStyle(View.SCROLLBARS_INSIDE_INSET);
+
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("Execute", (dialog, which) ->
+        {
+            String ss = input.getText().toString();
+            print (ss);
+            _runner.receive(ss);
+            saveFile (title, ss);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        AlertDialog show;
+        show = builder.show();
+    }
+
     @Override
     public boolean onOptionsItemSelected (MenuItem item)
     {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
-            return true;
-        }
-
+        codeSlot (item);
         return super.onOptionsItemSelected(item);
     }
 }

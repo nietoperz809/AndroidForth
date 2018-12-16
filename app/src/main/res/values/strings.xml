@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">TextConsole</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_slot0">Slot0</string>
+    <string name="action_slot1">Slot1</string>
+    <string name="action_slot2">Slot2</string>
+    <string name="action_slot3">Slot3</string>
+    <string name="action_slot4">Slot4</string>
+    <string name="action_slot5">Slot5</string>
+    <string name="action_slot6">Slot6</string>
+    <string name="action_slot7">Slot7</string>
+    <string name="action_slot8">Slot8</string>
+    <string name="action_slot9">Slot9</string>
 </resources>

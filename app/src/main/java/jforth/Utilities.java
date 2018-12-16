@@ -158,7 +158,7 @@ public class Utilities
         return shorts;
     }
 
-    public static byte[] toRawByteArray (String in)
+    public static byte[] toRawByteArrayBE (String in)
     {
         char[] chars = in.toCharArray();
         byte[] bytes = new byte[chars.length*2];
@@ -166,6 +166,18 @@ public class Utilities
         {
             bytes[i*2] = (byte) (chars[i] >> 8);
             bytes[i*2+1] = (byte) chars[i];
+        }
+        return bytes;
+    }
+
+    public static byte[] toRawByteArrayLE (String in)
+    {
+        char[] chars = in.toCharArray();
+        byte[] bytes = new byte[chars.length*2];
+        for(int i=0;i<chars.length;i++)
+        {
+            bytes[i*2+1] = (byte) (chars[i] >> 8);
+            bytes[i*2] = (byte) chars[i];
         }
         return bytes;
     }

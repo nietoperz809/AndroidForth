@@ -1,5 +1,6 @@
 package jforth.forthwords;
 
+import com.pit.administrator.textconsole.MyApp;
 import jforth.*;
 import jforth.waves.*;
 import org.apache.commons.math3.complex.Complex;
@@ -720,13 +721,14 @@ class Filler2
                             try
                             {
                                 String s1 = Utilities.readString(dStack);
-                                Morse m = new Morse();
+                                Morse m = new Morse(JForth.SAMPLERATE);
                                 byte[] morse = m.text2Wave(s1);
                                 dStack.push(Morse.toAudioString(morse));
                                 return 1;
                             }
                             catch (Exception e)
                             {
+                                MyApp.showException(e);
                                 return 0;
                             }
                         }

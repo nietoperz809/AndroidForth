@@ -172,7 +172,7 @@ public class Wave16
      * @param raw raw sample data
      * @return header+samples
      */
-    public static byte[] makeHeader11025 (byte[] raw)
+    public static byte[] makeHeader (byte[] raw, int samplerate)
     {
         byte[] headerdata =
                 {
@@ -183,6 +183,7 @@ public class Wave16
                         0x14, 0x00, 0x00, 0x00,
                 };
 
+        intToBytes (samplerate, headerdata, 24);
         intToBytes(raw.length+44-8, headerdata, 4);
         intToBytes(raw.length, headerdata, 40);
 
@@ -191,6 +192,7 @@ public class Wave16
         System.arraycopy(raw, 0, ret, headerdata.length, raw.length);
         return ret;
     }
+
 
     public byte[] toByteArray ()
     {
