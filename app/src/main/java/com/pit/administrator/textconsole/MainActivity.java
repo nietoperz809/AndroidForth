@@ -14,20 +14,48 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import com.evgenii.jsevaluator.JsEvaluator;
+import com.evgenii.jsevaluator.interfaces.JsCallback;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import static com.pit.administrator.textconsole.R.id.scrollView;
 import static com.pit.administrator.textconsole.R.id.textView;
 
 public class MainActivity extends AppCompatActivity
 {
+    private JsEvaluator jsEvaluator = new JsEvaluator(this);
     private TextView _myTextView;
     private ScrollView _scroll;
     private EditText _edittext;
     private Handler _hand;
     private ForthRunner _runner;
     private static final String CLS = "\u001b[2J";
+
+    public String javaScript (final String arg) throws Exception
+    {
+        final ArrayBlockingQueue<String> que = new ArrayBlockingQueue<>(2);
+        runOnUiThread(() ->
+        {
+            jsEvaluator.evaluate(arg, new JsCallback()
+            {
+                @Override
+                public void onResult(String result)
+                {
+                    que.offer(result);
+                }
+
+                @Override
+                public void onError(String errorMessage)
+                {
+                    que.offer(errorMessage);
+                }
+            });
+        });
+        return que.take();
+    }
 
     public void print (final String txt)
     {
@@ -124,7 +152,6 @@ public class MainActivity extends AppCompatActivity
     {
         final String title = String.valueOf(item.getTitle());
         String content = readFile(title);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         // Set up the input
@@ -145,12 +172,15 @@ public class MainActivity extends AppCompatActivity
             String ss = input.getText().toString();
             print (ss);
             _runner.receive(ss);
-            saveFile (title, ss);
+            if (!ss.equals(content))
+                saveFile (title, ss);
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        AlertDialog show;
-        show = builder.show();
+        builder.setNeutralButton("Clear", (dialog, which) ->
+        {
+            saveFile (title, "");
+        });
+        builder.show();
     }
 
     @Override

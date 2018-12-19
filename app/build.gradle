@@ -25,6 +25,7 @@ android {
 
 dependencies 
         {
+            compile(name:'jsevaluator-1.0', ext:'aar')
             // Required -- JUnit 4 framework
             testImplementation 'junit:junit:4.12'
             // Optional -- Robolectric environment

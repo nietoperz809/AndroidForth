@@ -1,5 +1,6 @@
 package jforth.forthwords;
 
+import com.pit.administrator.textconsole.MainActivity;
 import com.pit.administrator.textconsole.MyApp;
 import jforth.*;
 import jforth.waves.*;
@@ -230,26 +231,26 @@ class Filler2
                         }
                 ));
 
-//        _fw.add(new PrimitiveWord
-//                (
-//                        "js", false, "evaluate js expression string",
-//                        (dStack, vStack) ->
-//                        {
-//                            try
-//                            {
-//                                String ss = Utilities.readString(dStack);
-//                                ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-//                                Object o = engine.eval(ss);
-//                                dStack.push(o);
-//                                return 1;
-//                            }
-//                            catch (Exception ex)
-//                            {
-//                                return 0;
-//                            }
-//                        }
-//                ));
-//
+        _fw.add(new PrimitiveWord
+                (
+                        "js", false, "evaluate js expression string",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                String ss = Utilities.readString(dStack);
+                                final MainActivity ma = (MainActivity)MyApp.getInstance().getActivity();
+                                String ret = ma.javaScript(ss);
+                                dStack.push(ret);
+                                return 1;
+                            }
+                            catch (Exception ex)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
+
 //        _fw.add(new PrimitiveWord
 //                (
 //                        "java", false, "compile and run java class",
