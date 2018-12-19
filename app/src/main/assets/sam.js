@@ -3,53 +3,7 @@ try {
 } catch(e) {
   this['Module'] = Module = {};
 }
-var ENVIRONMENT_IS_NODE = typeof process === 'object' && typeof require === 'function';
 var ENVIRONMENT_IS_WEB = typeof window === 'object';
-var ENVIRONMENT_IS_WORKER = typeof importScripts === 'function';
-var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_WORKER;
-if (ENVIRONMENT_IS_NODE) {
-  Module['print'] = function(x) {
-    process['stdout'].write(x + '\n');
-  };
-  Module['printErr'] = function(x) {
-    process['stderr'].write(x + '\n');
-  };
-  var nodeFS = require('fs');
-  var nodePath = require('path');
-  Module['read'] = function(filename, binary) {
-    filename = nodePath['normalize'](filename);
-    var ret = nodeFS['readFileSync'](filename);
-    if (!ret && filename != nodePath['resolve'](filename)) {
-      filename = path.join(__dirname, '..', 'src', filename);
-      ret = nodeFS['readFileSync'](filename);
-    }
-    if (ret && !binary) ret = ret.toString();
-    return ret;
-  };
-  Module['readBinary'] = function(filename) { return Module['read'](filename, true) };
-  Module['load'] = function(f) {
-    globalEval(read(f));
-  };
-  if (!Module['arguments']) {
-    Module['arguments'] = process['argv'].slice(2);
-  }
-}
-if (ENVIRONMENT_IS_SHELL) {
-  Module['print'] = print;
-  if (typeof printErr != 'undefined') Module['printErr'] = printErr; // not present in v8 or older sm
-  Module['read'] = read;
-  Module['readBinary'] = function(f) {
-    return read(f, 'binary');
-  };
-  if (!Module['arguments']) {
-    if (typeof scriptArgs != 'undefined') {
-      Module['arguments'] = scriptArgs;
-    } else if (typeof arguments != 'undefined') {
-      Module['arguments'] = arguments;
-    }
-  }
-}
-if (ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_WORKER) {
   if (!Module['print']) {
     Module['print'] = function(x) {
       console.log(x);
@@ -60,8 +14,6 @@ if (ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_WORKER) {
       console.log(x);
     };
   }
-}
-if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
   Module['read'] = function(url) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, false);
@@ -73,21 +25,6 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
       Module['arguments'] = arguments;
     }
   }
-}
-if (ENVIRONMENT_IS_WORKER) {
-  // We can do very little here...
-  var TRY_USE_DUMP = false;
-  if (!Module['print']) {
-    Module['print'] = (TRY_USE_DUMP && (typeof(dump) !== "undefined") ? (function(x) {
-      dump(x);
-    }) : (function(x) {
-    }));
-  }
-  Module['load'] = importScripts;
-}
-if (!ENVIRONMENT_IS_WORKER && !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIRONMENT_IS_SHELL) {
-  throw 'Unknown runtime environment. Where are we?';
-}
 function globalEval(x) {
   eval.call(null, x);
 }
@@ -796,16 +733,13 @@ function loadMemoryInitializer(filename) {
     runPostSets();
   }
   // always do this asynchronously, to keep shell and web as similar as possible
-  addPreRun(function() {
-    if (ENVIRONMENT_IS_NODE || ENVIRONMENT_IS_SHELL) {
-      applyData(Module['readBinary'](filename));
-    } else {
+  addPreRun(function()
+  {
       Browser.asyncLoad(filename, function(data) {
         applyData(data);
       }, function(data) {
         throw 'could not load memory initializer ' + filename;
       });
-    }
   });
   awaitingMemoryInitializer = false;
 }
@@ -1004,7 +938,6 @@ if (!awaitingMemoryInitializer) runPostSets();
         return FS.createFile(parent, name, properties, canRead, canWrite);
       },createLazyFile:function (parent, name, url, canRead, canWrite) {
         if (typeof XMLHttpRequest !== 'undefined') {
-          if (!ENVIRONMENT_IS_WORKER) throw 'Cannot do synchronous binary XHRs outside webworkers in modern browsers. Use --embed-file or --preload-file in emcc';
           // Lazy chunked Uint8Array (implements get and length from Uint8Array). Actual getting is abstracted away for eventual reuse.
           var LazyUint8Array = function(chunkSize, length) {
             this.length = length;
