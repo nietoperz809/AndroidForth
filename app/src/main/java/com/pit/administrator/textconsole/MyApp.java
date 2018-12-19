@@ -9,6 +9,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 public class MyApp extends Application
 {
     private static MyApp instance;
@@ -102,4 +107,18 @@ public class MyApp extends Application
         return currentActivity;
     }
 
+    //load file from apps res/raw folder or Assets folder
+    public String LoadFile (String fileName) throws IOException
+    {
+        //Create a InputStream to read the file into
+        InputStream inputStream = getResources().getAssets().open(fileName);
+
+        BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder total = new StringBuilder();
+        for (String line; (line = r.readLine()) != null; )
+        {
+            total.append(line).append('\n');
+        }
+        return total.toString();
+    }
 }

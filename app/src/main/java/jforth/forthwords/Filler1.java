@@ -1,5 +1,6 @@
 package jforth.forthwords;
 
+import com.pit.administrator.textconsole.MainActivity;
 import com.pit.administrator.textconsole.MyApp;
 import jforth.*;
 import jforth.waves.Wave16;
@@ -1948,24 +1949,27 @@ class Filler1
                         }
                 ));
 
-//        _fw.add(new PrimitiveWord
-//                (
-//                        "sam", false, "Make SAM data",
-//                        (dStack, vStack) ->
-//                        {
-//                            try
-//                            {
-//                                String words = Utilities.readString(dStack);
-//                                String wave = WavePlayer.toWaveString(words);
-//                                dStack.push(wave);
-//                                return 1;
-//                            }
-//                            catch (Exception e)
-//                            {
-//                                return 0;
-//                            }
-//                        }
-//                ));
+        _fw.add(new PrimitiveWord
+                (
+                        "sam", false, "Speak using SAM",
+                        (dStack, vStack) ->
+                        {
+                            try
+                            {
+                                //String ss = Utilities.readString(dStack);
+                                String s1 = MyApp.getInstance().LoadFile("sam.js");
+                                String s2 = MyApp.getInstance().LoadFile("speak.js");
+                                final MainActivity ma = (MainActivity)MyApp.getInstance().getActivity();
+                                String ret = ma.javaScript(s1+"\r\n\n"+s2);
+                                dStack.push(ret);
+                                return 1;
+                            }
+                            catch (Exception ex)
+                            {
+                                return 0;
+                            }
+                        }
+                ));
 
         _fw.add(new PrimitiveWord
                 (
