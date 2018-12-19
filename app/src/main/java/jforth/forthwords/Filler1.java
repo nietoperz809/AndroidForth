@@ -1960,7 +1960,7 @@ class Filler1
                                 String s1 = MyApp.getInstance().LoadFile("sam.js");
                                 String s2 = MyApp.getInstance().LoadFile("speak.js");
                                 final MainActivity ma = (MainActivity)MyApp.getInstance().getActivity();
-                                ma.javaScriptAsync(new StringBuilder()
+                                ma.javaScript(new StringBuilder()
                                         .append(s1)
                                         .append("\n")
                                         .append(s2)

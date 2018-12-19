@@ -1,6 +1,7 @@
 package com.pit.administrator.textconsole;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
@@ -57,25 +58,6 @@ public class MainActivity extends AppCompatActivity
         return que.take();
     }
 
-    public void javaScriptAsync (final String arg) throws Exception
-    {
-        runOnUiThread(() ->
-        {
-            jsEvaluator.evaluate(arg, new JsCallback()
-            {
-                @Override
-                public void onResult(String result)
-                {
-
-                }
-
-                @Override
-                public void onError(String errorMessage){
-                }
-            });
-        });
-    }
-
     public void print (final String txt)
     {
         _hand.post(() ->
@@ -91,6 +73,18 @@ public class MainActivity extends AppCompatActivity
             }
             _scroll.post(() -> _scroll.fullScroll(View.FOCUS_DOWN));
         });
+    }
+
+    private void setMaxVolume()
+    {
+        // Get the AudioManager
+        AudioManager audioManager =
+                (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+        // Set the volume of played media to maximum.
+        audioManager.setStreamVolume (
+                AudioManager.STREAM_MUSIC,
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                0);
     }
 
     private void init()
@@ -123,6 +117,7 @@ public class MainActivity extends AppCompatActivity
         MyApp.setFullScreenPortrait(this);
         setContentView(R.layout.activity_main);
         init();
+        setMaxVolume();
     }
 
     @Override
