@@ -1956,11 +1956,18 @@ class Filler1
                         {
                             try
                             {
-                                //String ss = Utilities.readString(dStack);
+                                String ss = Utilities.readString(dStack);
                                 String s1 = MyApp.getInstance().LoadFile("sam.js");
                                 String s2 = MyApp.getInstance().LoadFile("speak.js");
                                 final MainActivity ma = (MainActivity)MyApp.getInstance().getActivity();
-                                String ret = ma.javaScript(s1+"\r\n\n"+s2);
+                                //String ret = ma.javaScript(s1+"\r\n\n"+s2+ss+"\");");
+                                String ret = ma.javaScript(s1+
+                                        "\r\n"+
+                                        s2+
+                                        "\r\n"+
+                                        "Speak(\""+
+                                        ss+
+                                        "\");");
                                 dStack.push(ret);
                                 return 1;
                             }

@@ -1,20 +1,14 @@
 function Speak(text)
 {
-    //alert(text);
-
     var input = text;
     while (input.length < 256) input += " ";
     var ptr = allocate(intArrayFromString(input), 'i8', ALLOC_STACK);
     _TextToPhonemes(ptr);
-    //alert(Pointer_stringify(ptr));
     _SetInput(ptr);
     _Code39771();
-
     var bufferlength = Math.floor(_GetBufferLength()/50);
     var bufferptr = _GetBuffer();
-
     audiobuffer = new Float32Array(bufferlength);
-
     for(var i=0; i<bufferlength; i++)
         audiobuffer[i] = ((getValue(bufferptr+i, 'i8')&0xFF)-128)/256;
     //PlayBuffer(audiobuffer);
@@ -28,5 +22,3 @@ function Speak(text)
     source.connect(context.destination);
     source.start(0);
 }
-
-Speak ("hello world");
