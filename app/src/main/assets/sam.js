@@ -1056,8 +1056,8 @@ if (!awaitingMemoryInitializer) runPostSets();
           var lazyArray = new LazyUint8Array(chunkSize, datalength);
           lazyArray.setDataGetter(function(chunkNum) {
             var start = chunkNum * lazyArray.chunkSize;
-            var end = (chunkNum+1) * lazyArray.chunkSize - 1; // including this byte
-            end = Math.min(end, datalength-1); // if datalength-1 is selected, this is the last block
+            var end = (chunkNum+1) * lazyArray.chunkSize - 1; 
+            end = Math.min(end, datalength-1);
             if (typeof(lazyArray.chunks[chunkNum]) === "undefined") {
               lazyArray.chunks[chunkNum] = doXHR(start, end);
             }
@@ -1116,10 +1116,8 @@ if (!awaitingMemoryInitializer) runPostSets();
         if (typeof XMLHttpRequest !== 'undefined') {
           throw new Error("Lazy loading should have been performed (contents set) in createLazyFile, but it was not. Lazy loading only works in web workers. Use --embed-file or --preload-file in emcc on the main thread.");
         } else if (Module['read']) {
-          // Command-line.
+
           try {
-            // WARNING: Can't read binary files in V8's d8 or tracemonkey's js, as
-            //          read() will try to parse UTF8.
             obj.contents = intArrayFromString(Module['read'](obj.url), true);
           } catch (e) {
             success = false;
@@ -1131,7 +1129,7 @@ if (!awaitingMemoryInitializer) runPostSets();
         return success;
       },ensureRoot:function () {
         if (FS.root) return;
-        // The main file system tree. All the contents are inside this.
+
         FS.root = {
           read: true,
           write: true,
@@ -1142,15 +1140,15 @@ if (!awaitingMemoryInitializer) runPostSets();
           contents: {}
         };
       },init:function (input, output, error) {
-        // Make sure we initialize only once.
+
         assert(!FS.init.initialized, 'FS.init was previously called. If you want to initialize later with custom parameters, remove any earlier calls (note that one is automatically added to the generated code)');
         FS.init.initialized = true;
         FS.ensureRoot();
-        // Allow Module.stdin etc. to provide defaults, if none explicitly passed to us here
+
         input = input || Module['stdin'];
         output = output || Module['stdout'];
         error = error || Module['stderr'];
-        // Default handlers.
+
         var stdinOverridden = true, stdoutOverridden = true, stderrOverridden = true;
         if (!input) {
           stdinOverridden = false;
@@ -1159,11 +1157,11 @@ if (!awaitingMemoryInitializer) runPostSets();
               var result;
               if (typeof window != 'undefined' &&
                   typeof window.prompt == 'function') {
-                // Browser.
+
                 result = window.prompt('Input: ');
-                if (result === null) result = String.fromCharCode(0); // cancel ==> EOF
+                if (result === null) result = String.fromCharCode(0);
               } else if (typeof readline == 'function') {
-                // Command line.
+
                 result = readline();
               }
               if (!result) result = '';
@@ -1193,17 +1191,17 @@ if (!awaitingMemoryInitializer) runPostSets();
         }
         if (!error.printer) error.printer = Module['print'];
         if (!error.buffer) error.buffer = [];
-        // Create the temporary folder, if not already created
+
         try {
           FS.createFolder('/', 'tmp', true, true);
         } catch(e) {}
-        // Create the I/O devices.
+
         var devFolder = FS.createFolder('/', 'dev', true, true);
         var stdin = FS.createDevice(devFolder, 'stdin', input);
         var stdout = FS.createDevice(devFolder, 'stdout', null, output);
         var stderr = FS.createDevice(devFolder, 'stderr', null, error);
         FS.createDevice(devFolder, 'tty', input, output);
-        // Create default streams.
+
         FS.streams[1] = {
           path: '/dev/stdin',
           object: stdin,
@@ -1240,27 +1238,26 @@ if (!awaitingMemoryInitializer) runPostSets();
           eof: false,
           ungotten: []
         };
-        assert(Math.max(_stdin, _stdout, _stderr) < 128); // make sure these are low, we flatten arrays with these
+        assert(Math.max(_stdin, _stdout, _stderr) < 128);
         H32[((_stdin)>>2)]=1;
         H32[((_stdout)>>2)]=2;
         H32[((_stderr)>>2)]=3;
-        // Other system paths
-        FS.createPath('/', 'dev/shm/tmp', true, true); // temp files
-        // Newlib initialization
+
+        FS.createPath('/', 'dev/shm/tmp', true, true);
+
         for (var i = FS.streams.length; i < Math.max(_stdin, _stdout, _stderr) + 4; i++) {
-          FS.streams[i] = null; // Make sure to keep FS.streams dense
+          FS.streams[i] = null;
         }
         FS.streams[_stdin] = FS.streams[1];
         FS.streams[_stdout] = FS.streams[2];
         FS.streams[_stderr] = FS.streams[3];
         FS.checkStreams();
-        assert(FS.streams.length < 1024); // at this early stage, we should not have a large set of file descriptors - just a few
+        assert(FS.streams.length < 1024);
         allocate([ allocate(
           [0, 0, 0, 0, _stdin, 0, 0, 0, _stdout, 0, 0, 0, _stderr, 0, 0, 0],
           'void*', ALLOC_STATIC) ], 'void*', ALLOC_NONE, __impure_ptr);
       },quit:function () {
         if (!FS.init.initialized) return;
-        // Flush any partially-printed lines in stdout and stderr. Careful, they may have been closed
         if (FS.streams[2] && FS.streams[2].object.output.buffer.length > 0) FS.streams[2].object.output(10);
         if (FS.streams[3] && FS.streams[3].object.output.buffer.length > 0) FS.streams[3].object.output(10);
       },standardizePath:function (path) {
@@ -1274,8 +1271,6 @@ if (!awaitingMemoryInitializer) runPostSets();
         delete path.parentObject.contents[path.name];
       }};
   function _pwrite(fildes, buf, nbyte, offset) {
-      // ssize_t pwrite(int fildes, const void *buf, size_t nbyte, off_t offset);
-      // http://pubs.opengroup.org/onlinepubs/000095399/functions/write.html
       var stream = FS.streams[fildes];
       if (!stream || stream.object.isDevice) {
         ___setErrNo(ERRNO_CODES.EBADF);
@@ -1356,7 +1351,7 @@ if (!awaitingMemoryInitializer) runPostSets();
           ret = [H32[(((varargs)+(argIndex))>>2)],
                  H32[(((varargs)+(argIndex+4))>>2)]];
         } else {
-          type = 'i32'; // varargs are always i32, i64, or double
+          type = 'i32';
           ret = H32[(((varargs)+(argIndex))>>2)];
         }
         argIndex += Runtime.getNativeFieldSize(type);
@@ -1370,7 +1365,7 @@ if (!awaitingMemoryInitializer) runPostSets();
         if (curr === 0) break;
         next = H8[((textIndex+1)|0)];
         if (curr == 37) {
-          // Handle flags.
+
           var flagAlwaysSigned = false;
           var flagLeftAlign = false;
           var flagAlternative = false;
@@ -1399,7 +1394,7 @@ if (!awaitingMemoryInitializer) runPostSets();
             textIndex++;
             next = H8[((textIndex+1)|0)];
           }
-          // Handle width.
+
           var width = 0;
           if (next == 42) {
             width = getNextArg('i32');
@@ -1412,7 +1407,7 @@ if (!awaitingMemoryInitializer) runPostSets();
               next = H8[((textIndex+1)|0)];
             }
           }
-          // Handle precision.
+
           var precisionSet = false;
           if (next == 46) {
             var precision = 0;
@@ -1433,37 +1428,37 @@ if (!awaitingMemoryInitializer) runPostSets();
             }
             next = H8[((textIndex+1)|0)];
           } else {
-            var precision = 6; // Standard default.
+            var precision = 6;
           }
-          // Handle integer sizes. WARNING: These assume a 32-bit architecture!
+
           var argSize;
           switch (String.fromCharCode(next)) {
             case 'h':
               var nextNext = H8[((textIndex+2)|0)];
               if (nextNext == 104) {
                 textIndex++;
-                argSize = 1; // char (actually i32 in varargs)
+                argSize = 1;
               } else {
-                argSize = 2; // short (actually i32 in varargs)
+                argSize = 2;
               }
               break;
             case 'l':
               var nextNext = H8[((textIndex+2)|0)];
               if (nextNext == 108) {
                 textIndex++;
-                argSize = 8; // long long
+                argSize = 8;
               } else {
-                argSize = 4; // long
+                argSize = 4;
               }
               break;
-            case 'L': // long long
-            case 'q': // int64_t
-            case 'j': // intmax_t
+            case 'L':
+            case 'q':
+            case 'j':
               argSize = 8;
               break;
-            case 'z': // size_t
-            case 't': // ptrdiff_t
-            case 'I': // signed ptrdiff_t or unsigned size_t
+            case 'z':
+            case 't':
+            case 'I':
               argSize = 4;
               break;
             default:
@@ -1471,25 +1466,25 @@ if (!awaitingMemoryInitializer) runPostSets();
           }
           if (argSize) textIndex++;
           next = H8[((textIndex+1)|0)];
-          // Handle type specifier.
+
           switch (String.fromCharCode(next)) {
             case 'd': case 'i': case 'u': case 'o': case 'x': case 'X': case 'p': {
-              // Integer.
+
               var signed = next == 100 || next == 105;
               argSize = argSize || 4;
               var currArg = getNextArg('i' + (argSize * 8));
               var origArg = currArg;
               var argText;
-              // Flatten i64-1 [low, high] into a (slightly rounded) double
+
               if (argSize == 8) {
                 currArg = Runtime.makeBigInt(currArg[0], currArg[1], next == 117);
               }
-              // Truncate to requested size.
+
               if (argSize <= 4) {
                 var limit = Math.pow(256, argSize) - 1;
                 currArg = (signed ? reSign : unSign)(currArg & limit, argSize * 8);
               }
-              // Format the number.
+
               var currAbsArg = Math.abs(currArg);
               var prefix = '';
               if (next == 100 || next == 105) {
@@ -1514,7 +1509,7 @@ if (!awaitingMemoryInitializer) runPostSets();
                   }
                 } else
                 if (currArg < 0) {
-                  // Represent negative numbers in hex as 2's complement.
+
                   currArg = -currArg;
                   argText = (currAbsArg - 1).toString(16);
                   var buffer = [];
@@ -1543,7 +1538,7 @@ if (!awaitingMemoryInitializer) runPostSets();
                   argText = '0' + argText;
                 }
               }
-              // Add sign if needed
+
               if (flagAlwaysSigned) {
                 if (currArg < 0) {
                   prefix = '-' + prefix;
@@ -1551,7 +1546,7 @@ if (!awaitingMemoryInitializer) runPostSets();
                   prefix = '+' + prefix;
                 }
               }
-              // Add padding.
+
               while (prefix.length + argText.length < width) {
                 if (flagLeftAlign) {
                   argText += ' ';
@@ -1563,7 +1558,7 @@ if (!awaitingMemoryInitializer) runPostSets();
                   }
                 }
               }
-              // Insert the result into the buffer.
+
               argText = prefix + argText;
               argText.split('').forEach(function(chr) {
                 ret.push(chr.charCodeAt(0));
@@ -1571,7 +1566,7 @@ if (!awaitingMemoryInitializer) runPostSets();
               break;
             }
             case 'f': case 'F': case 'e': case 'E': case 'g': case 'G': {
-              // Float.
+
               var currArg = getNextArg('double');
               var argText;
               if (isNaN(currArg)) {
@@ -1598,7 +1593,7 @@ if (!awaitingMemoryInitializer) runPostSets();
                 }
                 if (next == 101 || next == 69) {
                   argText = currArg.toExponential(effectivePrecision);
-                  // Make sure the exponent has at least 2 digits.
+
                   if (/[eE][-+]\d$/.test(argText)) {
                     argText = argText.slice(0, -1) + '0' + argText.slice(-1);
                   }
@@ -1610,26 +1605,26 @@ if (!awaitingMemoryInitializer) runPostSets();
                 }
                 var parts = argText.split('e');
                 if (isGeneral && !flagAlternative) {
-                  // Discard trailing zeros and periods.
+
                   while (parts[0].length > 1 && parts[0].indexOf('.') != -1 &&
                          (parts[0].slice(-1) == '0' || parts[0].slice(-1) == '.')) {
                     parts[0] = parts[0].slice(0, -1);
                   }
                 } else {
-                  // Make sure we have a period in alternative mode.
+
                   if (flagAlternative && argText.indexOf('.') == -1) parts[0] += '.';
-                  // Zero pad until required precision.
+
                   while (precision > effectivePrecision++) parts[0] += '0';
                 }
                 argText = parts[0] + (parts.length > 1 ? 'e' + parts[1] : '');
-                // Capitalize 'E' if needed.
+
                 if (next == 69) argText = argText.toUpperCase();
-                // Add sign.
+
                 if (flagAlwaysSigned && currArg >= 0) {
                   argText = '+' + argText;
                 }
               }
-              // Add padding.
+
               while (argText.length < width) {
                 if (flagLeftAlign) {
                   argText += ' ';
@@ -1641,16 +1636,16 @@ if (!awaitingMemoryInitializer) runPostSets();
                   }
                 }
               }
-              // Adjust case.
+
               if (next < 97) argText = argText.toUpperCase();
-              // Insert the result into the buffer.
+
               argText.split('').forEach(function(chr) {
                 ret.push(chr.charCodeAt(0));
               });
               break;
             }
             case 's': {
-              // String.
+
               var arg = getNextArg('i8*') || nullString;
               var argLength = _strlen(arg);
               if (precisionSet) argLength = Math.min(argLength, precision);
@@ -1670,7 +1665,7 @@ if (!awaitingMemoryInitializer) runPostSets();
               break;
             }
             case 'c': {
-              // Character.
+
               if (flagLeftAlign) ret.push(getNextArg('i8'));
               while (--width > 0) {
                 ret.push(32);
@@ -1679,26 +1674,24 @@ if (!awaitingMemoryInitializer) runPostSets();
               break;
             }
             case 'n': {
-              // Write the length written so far to the next parameter.
+
               var ptr = getNextArg('i32*');
               H32[((ptr)>>2)]=ret.length
               break;
             }
             case '%': {
-              // Literal percent sign.
+
               ret.push(curr);
               break;
             }
             default: {
-              // Unknown specifiers remain untouched.
+
               for (var i = startTextIndex; i < textIndex + 2; i++) {
                 ret.push(H8[(i)]);
               }
             }
           }
           textIndex += 2;
-          // TODO: Support a/A (hex float) and m (last error) specifiers.
-          // TODO: Support %1${specifier} for arg selection.
         } else {
           ret.push(curr);
           textIndex += 1;
@@ -1895,37 +1888,29 @@ if (!awaitingMemoryInitializer) runPostSets();
       return ret;
     }
   function _sbrk(bytes) {
-      // Implement a Linux-like 'memory area' for our 'process'.
-      // Changes the size of the memory area by |bytes|; returns the
-      // address of the previous top ('break') of the memory area
-      // We need to make sure no one else allocates unfreeable memory!
-      // We must control this entirely. So we don't even need to do
-      // unfreeable allocations - the H is ours, from STATICTOP up.
-      // TODO: We could in theory slice off the top of the H when
-      //       sbrk gets a negative increment in |bytes|...
       var self = _sbrk;
       if (!self.called) {
-        STATICTOP = alignMemoryPage(STATICTOP); // make sure we start out aligned
+        STATICTOP = alignMemoryPage(STATICTOP);
         self.called = true;
         _sbrk.DYNAMIC_START = STATICTOP;
       }
       var ret = STATICTOP;
       if (bytes != 0) Runtime.staticAlloc(bytes);
-      return ret;  // Previous break location.
+      return ret;
     }
   function _memset(ptr, value, num) {
       ptr = ptr|0; value = value|0; num = num|0;
       var stop = 0, value4 = 0, stop4 = 0, unaligned = 0;
       stop = (ptr + num)|0;
       if ((num|0) >= 20) {
-        // This is unaligned, but quite large, so work hard to get to aligned settings
+
         value = value & 0xff;
         unaligned = ptr & 3;
         value4 = value | (value << 8) | (value << 16) | (value << 24);
         stop4 = stop & ~3;
         if (unaligned) {
           unaligned = (ptr + 4 - unaligned)|0;
-          while ((ptr|0) < (unaligned|0)) { // no need to check for stop, since we have large num
+          while ((ptr|0) < (unaligned|0)) {
             H8[(ptr)]=value;
             ptr = (ptr+1)|0;
           }
@@ -1976,13 +1961,6 @@ if (!awaitingMemoryInitializer) runPostSets();
         }
         Browser.BlobBuilder = typeof MozBlobBuilder != "undefined" ? MozBlobBuilder : (typeof WebKitBlobBuilder != "undefined" ? WebKitBlobBuilder : (!Browser.hasBlobConstructor ? console.log("warning: no BlobBuilder") : null));
         Browser.URLObject = typeof window != "undefined" ? (window.URL ? window.URL : window.webkitURL) : console.log("warning: cannot create object URLs");
-        // Support for plugins that can process preloaded files. You can add more of these to
-        // your app by creating and appending to Module.preloadPlugins.
-        //
-        // Each plugin is asked if it can handle a file based on the file's name. If it can,
-        // it is given the file's raw data. When it is done, it calls a callback with the file's
-        // (possibly modified) data. For example, a plugin might decompress a file, or it
-        // might create some side data structure for use later (like an Image element, etc.).
         function getMimetype(name) {
           return {
             'jpg': 'image/jpeg',
@@ -2010,7 +1988,7 @@ if (!awaitingMemoryInitializer) runPostSets();
           }
           if (!b) {
             var bb = new Browser.BlobBuilder();
-            bb.append((new Uint8Array(byteArray)).buffer); // we need to pass a buffer, and must copy the array to get the right data range
+            bb.append((new Uint8Array(byteArray)).buffer);
             b = bb.getBlob();
           }
           var url = Browser.URLObject.createObjectURL(b);
@@ -2049,7 +2027,7 @@ if (!awaitingMemoryInitializer) runPostSets();
           function fail() {
             if (done) return;
             done = true;
-            Module["preloadedAudios"][name] = new Audio(); // empty shim
+            Module["preloadedAudios"][name] = new Audio();
             if (onerror) onerror();
           }
           if (Browser.hasBlobConstructor) {
@@ -2058,10 +2036,10 @@ if (!awaitingMemoryInitializer) runPostSets();
             } catch(e) {
               return fail();
             }
-            var url = Browser.URLObject.createObjectURL(b); // XXX we never revoke this!
+            var url = Browser.URLObject.createObjectURL(b);
             assert(typeof url == 'string', 'createObjectURL must return a url as a string');
             var audio = new Audio();
-            audio.addEventListener('canplaythrough', function() { finish(audio) }, false); // use addEventListener due to chromium bug 124926
+            audio.addEventListener('canplaythrough', function() { finish(audio) }, false);
             audio.onerror = function(event) {
               if (done) return;
               console.log('warning: browser could not fully decode audio ' + name + ', trying slower base64 approach');
@@ -2090,19 +2068,19 @@ if (!awaitingMemoryInitializer) runPostSets();
                 return ret;
               }
               audio.src = 'data:audio/x-' + name.substr(-3) + ';base64,' + encode64(byteArray);
-              finish(audio); // we don't wait for confirmation this worked - but it's worth trying
+              finish(audio);
             };
             audio.src = url;
-            // workaround for chrome bug 124926 - we do not always get oncanplaythrough or onerror
+
             setTimeout(function() {
-              finish(audio); // try to use it even though it is not necessarily ready to play
+              finish(audio);
             }, 10000);
           } else {
             return fail();
           }
         };
         Module['preloadPlugins'].push(audioPlugin);
-        // Canvas event setup
+
         var canvas = Module['canvas'];
         canvas.requestPointerLock = canvas['requestPointerLock'] ||
                                     canvas['mozRequestPointerLock'] ||
@@ -2143,9 +2121,9 @@ if (!awaitingMemoryInitializer) runPostSets();
           return null;
         }
         if (useWebGL) {
-          // Set the background of the WebGL canvas to black
+
           canvas.style.backgroundColor = "black";
-          // Warn on context loss
+
           canvas.addEventListener('webglcontextlost', function(event) {
             alert('WebGL context lost. You will need to reload the page.');
           }, false);
@@ -2215,7 +2193,7 @@ if (!awaitingMemoryInitializer) runPostSets();
         xhr.open('GET', url, true);
         xhr.responseType = 'arraybuffer';
         xhr.onload = function() {
-          if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
+          if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) {
             onload(xhr.response);
           } else {
             onerror();
@@ -2253,7 +2231,7 @@ if (!awaitingMemoryInitializer) runPostSets();
         canvas.width = screen.width;
         canvas.height = screen.height;
         var flags = HU32[((SDL.screen+Runtime.QUANTUM_SIZE*0)>>2)];
-        flags = flags | 0x00800000; // set SDL_FULLSCREEN flag
+        flags = flags | 0x00800000;
         H32[((SDL.screen+Runtime.QUANTUM_SIZE*0)>>2)]=flags
         Browser.updateResizeListeners();
       },setWindowedCanvasSize:function () {
@@ -2261,7 +2239,7 @@ if (!awaitingMemoryInitializer) runPostSets();
         canvas.width = this.windowedWidth;
         canvas.height = this.windowedHeight;
         var flags = HU32[((SDL.screen+Runtime.QUANTUM_SIZE*0)>>2)];
-        flags = flags & ~0x00800000; // clear SDL_FULLSCREEN flag
+        flags = flags & ~0x00800000;
         H32[((SDL.screen+Runtime.QUANTUM_SIZE*0)>>2)]=flags
         Browser.updateResizeListeners();
       }};
@@ -2272,7 +2250,6 @@ Module["requestFullScreen"] = function(lockPointer, resizeCanvas) { Browser.requ
   Module["pauseMainLoop"] = function() { Browser.mainLoop.pause() };
   Module["resumeMainLoop"] = function() { Browser.mainLoop.resume() };
 var FUNCTION_TABLE = [0, 0];
-// EMSCRIPTEN_START_FUNCS
 function _GetBuffer() {
   var label = 0;
   var $1=H32[((5255116)>>2)];
@@ -12931,11 +12908,7 @@ function _add_segment($m, $tbase, $tsize, $mmapped) {
     default: assert(0, "bad label: " + label);
   }
 }
-// EMSCRIPTEN_END_FUNCS
-// EMSCRIPTEN_END_FUNCS
-// Warning: printing of i64 values may be slightly rounded! No deep i64 math used, so precise i64 code not included
 var i64Math = null;
-// === Auto-generated postamble setup entry stuff ===
 Module.callMain = function callMain(args) {
   assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on __ATMAIN__)');
   assert(!Module['preRun'] || Module['preRun'].length == 0, 'cannot call main when preRun functions remain to be called');
@@ -12987,7 +12960,6 @@ function run(args) {
       toRun[i]();
     }
     if (runDependencies > 0) {
-      // a preRun added a dependency, run will be called later
       return 0;
     }
   }
@@ -13024,18 +12996,14 @@ function run(args) {
   }
 }
 Module['run'] = Module.run = run;
-// {{PRE_RUN_ADDITIONS}}
 if (Module['preInit']) {
   if (typeof Module['preInit'] == 'function') Module['preInit'] = [Module['preInit']];
   while (Module['preInit'].length > 0) {
     Module['preInit'].pop()();
   }
 }
-// shouldRunNow refers to calling main(), not run().
 var shouldRunNow = true;
 if (Module['noInitialRun']) {
   shouldRunNow = false;
 }
 run();
-// {{POST_RUN_ADDITIONS}}
-  // {{MODULE_ADDITIONS}}
