@@ -1960,15 +1960,14 @@ class Filler1
                                 String s1 = MyApp.getInstance().LoadFile("sam.js");
                                 String s2 = MyApp.getInstance().LoadFile("speak.js");
                                 final MainActivity ma = (MainActivity)MyApp.getInstance().getActivity();
-                                //String ret = ma.javaScript(s1+"\r\n\n"+s2+ss+"\");");
-                                String ret = ma.javaScript(s1+
-                                        "\r\n"+
-                                        s2+
-                                        "\r\n"+
-                                        "Speak(\""+
-                                        ss+
-                                        "\");");
-                                dStack.push(ret);
+                                ma.javaScriptAsync(new StringBuilder()
+                                        .append(s1)
+                                        .append("\n")
+                                        .append(s2)
+                                        .append("\nSpeak(\"")
+                                        .append(ss)
+                                        .append("\");")
+                                        .toString());
                                 return 1;
                             }
                             catch (Exception ex)

@@ -57,6 +57,25 @@ public class MainActivity extends AppCompatActivity
         return que.take();
     }
 
+    public void javaScriptAsync (final String arg) throws Exception
+    {
+        runOnUiThread(() ->
+        {
+            jsEvaluator.evaluate(arg, new JsCallback()
+            {
+                @Override
+                public void onResult(String result)
+                {
+
+                }
+
+                @Override
+                public void onError(String errorMessage){
+                }
+            });
+        });
+    }
+
     public void print (final String txt)
     {
         _hand.post(() ->
